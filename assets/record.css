@@ -283,6 +283,53 @@ body.menu-open .menu-toggle__close {
   border-bottom: 1px solid var(--line);
 }
 
+/* ---------- record-style 404 ---------- */
+.error-page main {
+  width: min(1120px, 100% - 2 * clamp(20px, 5vw, 48px));
+  min-height: 100svh;
+  margin-inline: auto;
+  padding: clamp(70px, 12vh, 130px) 0 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.error-page .error-code {
+  margin-top: 18px;
+  font-family: "Newsreader", Georgia, serif;
+  font-size: clamp(5rem, 15vw, 11rem);
+  font-weight: 300;
+  line-height: 0.76;
+  letter-spacing: -0.055em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--accent);
+  opacity: 0.55;
+}
+.error-page h1 {
+  max-width: 14ch;
+  margin-top: 30px;
+  font-family: "Newsreader", Georgia, serif;
+  font-weight: 300;
+  font-size: clamp(2.2rem, 4.7vw, 4rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+.error-page .error-copy {
+  max-width: 42ch;
+  margin-top: 18px;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.error-page .actions {
+  margin-top: 28px;
+}
+.error-page .site-footer {
+  padding-block: 0 26px;
+}
+.error-page .mx-strip {
+  margin-bottom: 0;
+}
+
 /* ---------- footer ---------- */
 .site-footer {
   padding-block: 28px 40px;
