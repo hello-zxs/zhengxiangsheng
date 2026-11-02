@@ -34,6 +34,43 @@
     year.textContent = String(new Date().getFullYear());
   }
 
+  /* mobile navigation */
+  var menuToggle = document.getElementById("menuToggle");
+  var mobileNav = document.getElementById("mobileNav");
+  var menuOpen = false;
+
+  function setMenu(open) {
+    if (!menuToggle || !mobileNav) return;
+    menuOpen = open;
+    mobileNav.classList.toggle("is-open", open);
+    mobileNav.setAttribute("aria-hidden", String(!open));
+    menuToggle.setAttribute("aria-expanded", String(open));
+    document.body.classList.toggle("menu-open", open);
+    if (open) {
+      var first = mobileNav.querySelector("a");
+      if (first) first.focus({ preventScroll: true });
+    } else {
+      menuToggle.focus({ preventScroll: true });
+    }
+  }
+
+  if (menuToggle && mobileNav) {
+    menuToggle.addEventListener("click", function () {
+      setMenu(!menuOpen);
+    });
+    mobileNav.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        setMenu(false);
+      });
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && menuOpen) setMenu(false);
+    });
+    window.matchMedia("(min-width: 901px)").addEventListener("change", function (event) {
+      if (event.matches && menuOpen) setMenu(false);
+    });
+  }
+
   var items = document.querySelectorAll(".reveal");
   if (!("IntersectionObserver" in window)) {
     items.forEach(function (item) {

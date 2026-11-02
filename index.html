@@ -1,21 +1,50 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="light" data-matrix="record">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Zheng Xiangsheng · 郑翔升 — Physics, transformation optics</title>
-<meta name="description" content="Zheng Xiangsheng (郑翔升) — Physics MSc at Western University, London, Ontario. Transformation optics, geodesic lenses and quantum optics.">
+<title>Zheng Xiangsheng 郑翔升 — Academic record</title>
+<meta name="description" content="The academic record of Zheng Xiangsheng (郑翔升): physics MSc at Western University, BSc at Xiamen University Malaysia, transformation optics, geodesic lenses and quantum optics.">
 <meta name="author" content="Zheng Xiangsheng">
 <meta name="theme-color" content="#f6f4ef">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Zheng Xiangsheng · 郑翔升">
-<meta property="og:description" content="I study how geometry shapes light — transformation optics, geodesic lenses and quantum optics.">
-<meta property="og:url" content="https://zhengxiangsheng.com">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2315171b'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='%23f6f4ef' stroke-width='3'/%3E%3Cpath d='M32 6v40' stroke='%23a8432a' stroke-width='3'/%3E%3C/svg%3E">
+<meta name="matrix-site" content="record">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Zheng Xiangsheng 郑翔升 — Academic record">
+<meta property="og:description" content="Physics MSc at Western University. Transformation optics, geodesic lenses and quantum optics. CV, publications and the formal record.">
+<meta property="og:url" content="https://zhengxiangsheng.com/">
+<meta property="og:image" content="https://zhengxiangsheng.com/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Zheng Xiangsheng 郑翔升 — Academic record">
+<meta name="twitter:description" content="Physics MSc at Western University. Transformation optics, geodesic lenses and quantum optics.">
+<meta name="twitter:image" content="https://zhengxiangsheng.com/assets/og.png">
+<link rel="canonical" href="https://zhengxiangsheng.com/">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Zheng Xiangsheng",
+  "alternateName": "郑翔升",
+  "url": "https://zhengxiangsheng.com/",
+  "jobTitle": "Physics MSc student",
+  "affiliation": { "@type": "Organization", "name": "Western University" },
+  "alumniOf": { "@type": "CollegeOrUniversity", "name": "Xiamen University Malaysia" },
+  "knowsAbout": ["Transformation optics", "Geodesic lenses", "Quantum optics"],
+  "sameAs": ["https://github.com/hello-zxs", "https://zhengxs.com/", "https://qmentropy.com/"]
+}
+</script>
+
+<link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/record.css">
+<link rel="stylesheet" href="assets/matrix/matrix.css">
 <script>
   (function () {
     var saved = localStorage.getItem("theme");
@@ -23,6 +52,9 @@
     document.documentElement.dataset.theme = saved || system;
     document.documentElement.classList.add("js");
   })();
+  window.addEventListener("error", function () {
+    document.documentElement.classList.remove("js");
+  });
 </script>
 </head>
 <body id="top">
@@ -34,40 +66,144 @@
       Zheng Xiangsheng <span class="zh" lang="zh">郑翔升</span>
     </a>
     <nav class="site-nav" aria-label="Sections">
+      <a href="#record">Record<span class="nav-zh zh" lang="zh">履历</span></a>
       <a href="#research">Research<span class="nav-zh zh" lang="zh">研究</span></a>
-      <a href="#work">Work<span class="nav-zh zh" lang="zh">论文</span></a>
+      <a href="#work">Publications<span class="nav-zh zh" lang="zh">论文</span></a>
       <a href="#about">About<span class="nav-zh zh" lang="zh">关于</span></a>
       <a href="#contact">Contact<span class="nav-zh zh" lang="zh">联系</span></a>
     </nav>
-    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch colour theme">
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-        <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
-        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
-          <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/>
-        </g>
-      </svg>
-    </button>
+    <div class="header-tools">
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch colour theme">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/>
+          </g>
+        </svg>
+      </button>
+      <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="mobileNav">
+        <span class="menu-toggle__open">Menu</span>
+        <span class="menu-toggle__close">Close</span>
+      </button>
+    </div>
   </div>
 </header>
 
+<div class="mobile-nav" id="mobileNav" aria-hidden="true">
+  <nav aria-label="Mobile">
+    <a href="#record"><span>Record</span><em>履历</em></a>
+    <a href="#research"><span>Research</span><em>研究</em></a>
+    <a href="#work"><span>Publications</span><em>论文</em></a>
+    <a href="#about"><span>About</span><em>关于</em></a>
+    <a href="#contact"><span>Contact</span><em>联系</em></a>
+  </nav>
+  <div class="mobile-nav__foot">
+    <a href="https://zhengxs.com/">Index ↗</a>
+    <a href="https://qmentropy.com/">Lab ↗</a>
+    <a href="https://zhengxs.com/matrix/">The matrix ↗</a>
+  </div>
+</div>
+
 <main id="main">
   <section class="hero wrap">
-    <p class="eyebrow">Physics MSc · Western University · London, Ontario</p>
-    <h1>I study how geometry <em>shapes light</em>.</h1>
-    <p class="hero-zh" lang="zh">研究几何如何决定光的传播：变换光学、测地线透镜，以及单光子层面的量子光学。</p>
+    <p class="eyebrow">Academic record · 2026</p>
+    <h1 class="hero-name">Zheng Xiangsheng<span class="hero-cn" lang="zh">郑翔升</span></h1>
+    <p class="hero-role">Physics MSc · Western University · London, Ontario</p>
+    <p class="hero-statement">I study how geometry <em>shapes light</em>.</p>
     <p class="lede">
-      I am Zheng Xiangsheng, a physics graduate of Xiamen University Malaysia, now reading for an
-      MSc at Western University. My work sits where a curved surface and a ray of light meet.
+      I am a physics graduate of Xiamen University Malaysia, now reading for an MSc at
+      Western University. My work sits where a curved surface and a ray of light meet:
+      transformation optics, geodesic lenses and quantum optics.
     </p>
+    <p class="hero-zh" lang="zh">研究几何如何决定光的传播：变换光学、测地线透镜，以及单光子层面的量子光学。</p>
     <div class="actions">
-      <a class="btn" href="https://qmentropy.com">Read the lab notes</a>
-      <a class="btn btn-ghost" href="https://github.com/hello-zxs">GitHub</a>
+      <a class="btn" href="assets/cv.pdf" download>Download CV (PDF)</a>
+      <a class="btn btn-ghost" href="https://qmentropy.com/">Read the lab notes</a>
+      <a class="btn btn-ghost" href="mailto:helloworld.3a@gmail.com">Email</a>
+    </div>
+    <dl class="hero-facts">
+      <div><dt>Based in</dt><dd>London, Ontario</dd></div>
+      <div><dt>MSc</dt><dd>Western University, 2026–</dd></div>
+      <div><dt>BSc (Hons)</dt><dd>Xiamen University Malaysia, 2026</dd></div>
+      <div><dt>Focus</dt><dd>Transformation optics</dd></div>
+    </dl>
+  </section>
+
+  <section class="section wrap" id="record">
+    <div class="section-head reveal">
+      <p class="index">01</p>
+      <h2>Record<span class="zh" lang="zh">学术履历</span></h2>
+      <p class="section-note">Education, publications, and the formal record. Updated November 2026.</p>
+    </div>
+    <div class="record reveal">
+      <div class="record-grid">
+        <div class="record-block">
+          <h3>Education</h3>
+          <div class="record-row">
+            <span class="record-date">2026–</span>
+            <div>
+              <strong>MSc in Physics</strong>
+              <span>Western University · London, Ontario</span>
+              <em>Transformation optics, geodesic lenses and quantum optics.</em>
+            </div>
+          </div>
+          <div class="record-row">
+            <span class="record-date">2022–2026</span>
+            <div>
+              <strong>BSc (Hons) in Physics</strong>
+              <span>Xiamen University Malaysia · Sepang, Malaysia</span>
+              <em>Thesis: ray tracing and equivalent geodesic lenses for the Morse lens. Advisor: Dr. Yap Seong Shan; co-advisor: Prof. Huanyang Chen.</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="record-block">
+          <h3>Publications &amp; writing</h3>
+          <div class="record-row">
+            <span class="record-date">2026</span>
+            <div>
+              <strong>Ray tracing and equivalent geodesic lenses for the Morse lens</strong>
+              <span>BSc (Hons) thesis · Xiamen University Malaysia</span>
+              <em><a href="https://qmentropy.com/papers/morse-lens/">Full text</a> · <a href="https://qmentropy.com/publications/">Publication record</a></em>
+            </div>
+          </div>
+          <div class="record-row">
+            <span class="record-date">2026</span>
+            <div>
+              <strong>Field notes on light and geometry</strong>
+              <span>Working notes · zhengxs.com</span>
+              <em><a href="https://zhengxs.com/notes/">Notes index</a></em>
+            </div>
+          </div>
+          <p class="record-note">Journal articles and conference contributions in progress. Nothing is listed here before it has a venue and a text.</p>
+        </div>
+      </div>
+
+      <div class="record-grid record-grid--lower">
+        <div class="record-block">
+          <h3>Skills</h3>
+          <dl class="record-skills">
+            <div><dt>Programming</dt><dd>Python (NumPy, SciPy, Matplotlib), git</dd></div>
+            <div><dt>Symbolic</dt><dd>Mathematica</dd></div>
+            <div><dt>Simulation</dt><dd>COMSOL</dd></div>
+            <div><dt>Writing</dt><dd>LaTeX, Markdown, scientific figures</dd></div>
+          </dl>
+        </div>
+        <div class="record-block">
+          <h3>Languages &amp; references</h3>
+          <dl class="record-skills">
+            <div><dt>Languages</dt><dd>Chinese (native), English (academic)</dd></div>
+            <div><dt>References</dt><dd>Available on request</dd></div>
+            <div><dt>CV</dt><dd><a href="assets/cv.pdf" download>Download the PDF (2 pages)</a></dd></div>
+          </dl>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="section wrap" id="research">
-    <div class="section-head">
-      <p class="index">01</p>
+    <div class="section-head reveal">
+      <p class="index">02</p>
       <h2>Research<span class="zh" lang="zh">研究方向</span></h2>
       <p class="section-note">Three threads, one question: how does geometry decide the path of light?</p>
     </div>
@@ -91,10 +227,10 @@
   </section>
 
   <section class="section wrap" id="work">
-    <div class="section-head">
-      <p class="index">02</p>
-      <h2>Work<span class="zh" lang="zh">论文与项目</span></h2>
-      <p class="section-note">Selected publication. Full texts, citations and BibTeX live on the notes site.</p>
+    <div class="section-head reveal">
+      <p class="index">03</p>
+      <h2>Selected work<span class="zh" lang="zh">代表作</span></h2>
+      <p class="section-note">The thesis is the anchor. Full texts and the working notebook live in the Lab.</p>
     </div>
     <div class="work">
       <article class="paper reveal">
@@ -107,17 +243,19 @@
           and validate the construction by ray tracing.
         </p>
         <p class="paper-links">
-          <a href="https://qmentropy.com/papers/morse-lens/">Full text</a>
-          <a href="https://qmentropy.com/publications/">All publications</a>
+          <a href="https://qmentropy.com/papers/morse-lens/">Full text ↗</a>
+          <a href="https://qmentropy.com/publications/">All publications ↗</a>
+          <a href="assets/cv.pdf" download>CV (PDF)</a>
         </p>
       </article>
     </div>
   </section>
 
   <section class="section wrap" id="about">
-    <div class="section-head">
-      <p class="index">03</p>
+    <div class="section-head reveal">
+      <p class="index">04</p>
       <h2>About<span class="zh" lang="zh">关于</span></h2>
+      <p class="section-note">The short version, in two languages.</p>
     </div>
     <div class="about">
       <p>
@@ -135,36 +273,42 @@
         <div><dt>MSc</dt><dd>Western University, 2026–</dd></div>
         <div><dt>BSc (Hons)</dt><dd>Xiamen University Malaysia, 2026</dd></div>
       </dl>
+      <p class="record-note">The living index is <a href="https://zhengxs.com/">zhengxs.com</a>; the research notebook is <a href="https://qmentropy.com/">qmentropy.com</a>.</p>
     </div>
   </section>
 
   <section class="section wrap" id="contact">
-    <div class="section-head">
-      <p class="index">04</p>
+    <div class="section-head reveal">
+      <p class="index">05</p>
       <h2>Contact<span class="zh" lang="zh">联系</span></h2>
       <p class="section-note">Discussions, collaborations and corrections are all welcome.</p>
     </div>
     <ul class="links">
-      <li>
-        <a href="https://qmentropy.com"><span>Physics Lab Notes</span><span class="link-sub">论文、研究笔记与 CV</span></a>
-      </li>
-      <li>
-        <a href="https://qmentropy.com/zh/"><span>中文站</span><span class="link-sub">Research notes in Chinese</span></a>
-      </li>
-      <li>
-        <a href="https://github.com/hello-zxs"><span>GitHub</span><span class="link-sub">@hello-zxs</span></a>
-      </li>
+      <li><a href="mailto:helloworld.3a@gmail.com"><span>Email</span><span class="link-sub">helloworld.3a@gmail.com</span></a></li>
+      <li><a href="https://zhengxs.com/"><span>Index ↗</span><span class="link-sub">zhengxs.com — the person, now</span></a></li>
+      <li><a href="https://qmentropy.com/"><span>Lab ↗</span><span class="link-sub">qmentropy.com — instruments and papers</span></a></li>
+      <li><a href="https://github.com/hello-zxs"><span>GitHub ↗</span><span class="link-sub">@hello-zxs</span></a></li>
     </ul>
   </section>
 </main>
 
 <footer class="site-footer">
-  <div class="wrap footer-inner">
-    <p>© <span id="year">2026</span> Zheng Xiangsheng · 郑翔升</p>
-    <p class="footer-note">Hand-written HTML, CSS and a little JavaScript. No framework.</p>
+  <div class="wrap">
+    <nav class="mx-strip mx-strip--light" aria-label="The matrix">
+      <span class="mx-strip__label">The matrix</span>
+      <a data-site="index" href="https://zhengxs.com/">Index <em>zhengxs.com</em></a>
+      <a data-site="lab" href="https://qmentropy.com/">Lab <em>qmentropy.com</em></a>
+      <a data-site="record" class="is-current" aria-current="page" href="https://zhengxiangsheng.com/">Record <em>zhengxiangsheng.com</em></a>
+      <a class="mx-strip__about" href="https://zhengxs.com/matrix/">About the matrix ↗</a>
+    </nav>
+    <div class="footer-inner">
+      <p>© <span id="year">2026</span> Zheng Xiangsheng · 郑翔升</p>
+      <p class="footer-note">Academic record · zhengxiangsheng.com · hand-written HTML, CSS and a little JavaScript.</p>
+    </div>
   </div>
 </footer>
 
 <script src="assets/app.js" defer></script>
+<script src="assets/matrix/matrix.js" defer></script>
 </body>
 </html>
