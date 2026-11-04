@@ -154,18 +154,18 @@
     }
 
     const colors = pick(FIREWORK_SETS);
-    let n = 220;
+    let n = 300;
     let speed = 5.4;
-    let life = 2.5;
-    let gravity = 8.5;
-    let drag = 0.988;
+    let life = 3.4;
+    let gravity = 2.4;
+    let drag = 0.992;
     let size = 1.7;
 
-    if (type === "chrysanthemum") { n = 250; speed = 5.8; life = 2.7; gravity = 7; size = 1.6; }
-    if (type === "willow") { n = 180; speed = 4.8; life = 3.4; gravity = 4.5; drag = 0.993; size = 1.4; }
-    if (type === "ring") { n = 200; speed = 5.0; life = 2.3; gravity = 5; size = 1.6; }
-    if (type === "crossette") { n = 110; speed = 5.4; life = 2.4; gravity = 9; size = 1.7; }
-    if (type === "palm") { n = 75; speed = 5.2; life = 2.9; gravity = 5.5; size = 2.6; }
+    if (type === "chrysanthemum") { n = 330; speed = 5.8; life = 3.6; gravity = 2.0; size = 1.6; }
+    if (type === "willow") { n = 240; speed = 4.8; life = 4.2; gravity = 1.0; drag = 0.995; size = 1.4; }
+    if (type === "ring") { n = 260; speed = 5.0; life = 3.2; gravity = 1.5; size = 1.6; }
+    if (type === "crossette") { n = 150; speed = 5.4; life = 3.2; gravity = 2.8; size = 1.7; }
+    if (type === "palm") { n = 100; speed = 5.2; life = 3.8; gravity = 1.2; size = 2.6; }
 
     for (let i = 0; i < n; i++) {
       let vx;
@@ -195,10 +195,6 @@
     flash(x, y, 1.55 * scale, colors[0]);
     shocks.push({ x, y, t: 0, life: 0.65, max: 96 * scale, color: colors[0] });
 
-    for (let i = 0; i < 5; i++) {
-      addSmoke(makeSmoke(x + rnd(-8, 8), y + rnd(-4, 8),
-        rnd(-12, 12), rnd(-8, 4), rnd(0.8, 1.5), rnd(8, 16)));
-    }
     for (let i = 0; i < 24; i++) {
       const a = rnd(0, Math.PI * 2);
       const s = rnd(0.5, 2.2);
@@ -231,60 +227,46 @@
     const jewel = ["#4169e1", "#8b1e3f", "#1f7a5a", "#bf9b30", "#ffd700"];
 
     flash(x, y, 3.0, "#ffd700");
-    shocks.push({ x, y, t: 0, life: 1.0, max: 270, color: "#ffd700" });
-    shocks.push({ x, y, t: 0.08, life: 0.85, max: 205, color: "#ffffff" });
-    shocks.push({ x, y, t: 0.18, life: 0.75, max: 150, color: "#bf9b30" });
+    fireballs.push({ x, y, t: 0, life: 2.2, scale: 1.35 });
+    shocks.push({ x, y, t: 0, life: 1.1, max: 280, color: "#ffd700" });
+    shocks.push({ x, y, t: 0.08, life: 0.95, max: 215, color: "#ffffff" });
 
-    for (let i = 0; i < 320; i++) {
-      const a = (i / 320) * Math.PI * 2 + rnd(-0.01, 0.01);
-      const s = 6.4 * Math.sqrt(rnd(0.12, 1));
+    for (let i = 0; i < 420; i++) {
+      const a = (i / 420) * Math.PI * 2 + rnd(-0.01, 0.01);
+      const s = 6.2 * Math.sqrt(rnd(0.12, 1));
       addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
-        rnd(2.9, 3.5), pick(gold), rnd(1.4, 2.4), 3.8, 0.991, "spark"));
+        rnd(3.6, 4.4), pick(gold), rnd(1.8, 2.8), 1.2, 0.994, "spark"));
     }
 
-    for (let i = 0; i < 100; i++) {
-      const a = (i / 100) * Math.PI * 2 + rnd(-0.02, 0.02);
+    for (let i = 0; i < 120; i++) {
+      const a = (i / 120) * Math.PI * 2 + rnd(-0.02, 0.02);
       const s = 3.2 * Math.sqrt(rnd(0.1, 1));
       addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
-        rnd(3.0, 3.8), pick(["#ffd700", "#e6b84a", "#ffe9a8"]),
-        rnd(1.0, 1.8), 2.0, 0.993, "spark"));
+        rnd(3.8, 4.6), pick(["#ffd700", "#e6b84a", "#ffe9a8"]),
+        rnd(1.2, 2.0), 0.7, 0.996, "spark"));
     }
 
-    window.setTimeout(() => {
-      if (reduced) return;
-      for (let i = 0; i < 180; i++) {
-        const a = (i / 180) * Math.PI * 2 + rnd(-0.02, 0.02);
-        const s = 4.0 * Math.sqrt(rnd(0.15, 1));
-        addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
-          rnd(2.5, 3.0), pick(jewel), rnd(1.1, 2.0), 4.2, 0.99, "spark"));
-      }
-    }, 130);
+    for (let i = 0; i < 240; i++) {
+      const a = (i / 240) * Math.PI * 2 + rnd(-0.02, 0.02);
+      const s = 4.0 * Math.sqrt(rnd(0.15, 1));
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(3.2, 3.8), pick(jewel), rnd(1.3, 2.2), 1.5, 0.994, "spark"));
+    }
 
-    window.setTimeout(() => {
-      if (reduced) return;
-      for (let i = 0; i < 140; i++) {
-        const a = (i / 140) * Math.PI * 2;
-        addParticle(makeParticle(x, y,
-          Math.cos(a) * 5.8, Math.sin(a) * 5.8 * 0.66,
-          rnd(2.6, 3.0), pick(["#fffbe6", "#ffd700", "#ffffff"]),
-          rnd(1.2, 2.0), 2.4, 0.993, "spark"));
-      }
-    }, 240);
+    for (let i = 0; i < 180; i++) {
+      const a = (i / 180) * Math.PI * 2;
+      addParticle(makeParticle(x, y,
+        Math.cos(a) * 5.8, Math.sin(a) * 5.8 * 0.66,
+        rnd(3.2, 3.8), pick(["#fffbe6", "#ffd700", "#ffffff"]),
+        rnd(1.4, 2.2), 1.0, 0.995, "spark"));
+    }
 
-    window.setTimeout(() => {
-      if (reduced) return;
-      for (let i = 0; i < 110; i++) {
-        const a = rnd(0, Math.PI * 2);
-        const s = rnd(1.2, 5.2);
-        addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
-          rnd(0.9, 1.7), pick(["#ffffff", "#ffe9a8", "#ffd700"]),
-          rnd(0.6, 1.2), 5, 0.985, "spark"));
-      }
-    }, 330);
-
-    for (let i = 0; i < 30; i++) {
-      addSmoke(makeSmoke(x + rnd(-24, 24), y + rnd(-10, 18),
-        rnd(-16, 16), rnd(-18, 2), rnd(1.6, 3.0), rnd(16, 34)));
+    for (let i = 0; i < 140; i++) {
+      const a = rnd(0, Math.PI * 2);
+      const s = rnd(1.2, 5.2);
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(1.4, 2.4), pick(["#ffffff", "#ffe9a8", "#ffd700"]),
+        rnd(0.6, 1.2), 2.0, 0.99, "spark"));
     }
   }
 
@@ -548,14 +530,6 @@
 
   function drawRocket(r) {
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = r.grand ? 0.5 : 0.32;
-    ctx.strokeStyle = r.grand ? "#ffe9a8" : "#ffb347";
-    ctx.lineWidth = r.grand ? 2.2 : 1.2;
-    ctx.beginPath();
-    ctx.moveTo(r.x0, r.y0);
-    ctx.lineTo(r.x, r.y);
-    ctx.stroke();
-
     const glow = r.grand ? 9 : 5.5;
     const g = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, glow * 2.2);
     g.addColorStop(0, "rgba(255,255,245,0.95)");
@@ -611,11 +585,6 @@
 
       if (r.trailClock > 0.045) {
         r.trailClock = 0;
-        addParticle(makeParticle(r.x + rnd(-2, 2), r.y + 4,
-          rnd(-8, 8), rnd(12, 34), rnd(0.18, 0.36),
-          pick(["#ffd60a", "#ff9f0a", "#ffffff"]), rnd(0.7, 1.4), 18, 0.97, "spark"));
-        addSmoke(makeSmoke(r.x + rnd(-2, 2), r.y + 6,
-          rnd(-3, 3), rnd(4, 10), rnd(0.35, 0.6), rnd(3, 6)));
       }
 
       if (k >= 1) {
@@ -737,8 +706,6 @@
       const p = particles[i];
       p.life -= dt;
       if (p.life <= 0) { particles.splice(i, 1); continue; }
-      p.history.push([p.x, p.y]);
-      if (p.history.length > 7) p.history.shift();
       p.vx *= Math.pow(p.drag, dt * 60);
       p.vy *= Math.pow(p.drag, dt * 60);
       p.vy += p.gravity * dt;
@@ -753,9 +720,9 @@
       const k = Math.max(0, p.life / p.maxLife);
       const alpha = Math.min(1, 0.5 + k * 0.65) * (p.flicker && Math.random() < 0.18 ? 0.25 : 1);
       const width = Math.max(0.6, p.size * (0.45 + 0.8 * k));
-      const h = p.history;
 
-      if (p.kind === "debris") {        ctx.globalCompositeOperation = "source-over";
+      if (p.kind === "debris") {
+        ctx.globalCompositeOperation = "source-over";
         ctx.globalAlpha = alpha * 0.9;
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x - p.size * 0.5, p.y - p.size * 0.5, p.size, p.size);
@@ -763,33 +730,33 @@
         continue;
       }
 
-      ctx.globalAlpha = alpha * 0.1;
+      ctx.globalAlpha = alpha * 0.16;
       ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, width * 3.2, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, Math.max(1.5, width * 1.7), 0, Math.PI * 2);
       ctx.fill();
-
-      if (h.length) {
-        ctx.globalAlpha = alpha * 0.55;
-        ctx.strokeStyle = p.color;
-        ctx.lineWidth = Math.max(0.8, width * 0.65);
-        ctx.beginPath();
-        ctx.moveTo(h[0][0], h[0][1]);
-        for (let j = 1; j < h.length; j++) ctx.lineTo(h[j][0], h[j][1]);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-      }
 
       if (p.size > 0.9) {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(1, p.size * 0.62), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(1.1, p.size * 0.8), 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(0.45, p.size * 0.26), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(0.5, p.size * 0.3), 0, Math.PI * 2);
         ctx.fill();
+
+        ctx.globalAlpha = alpha * 0.75;
+        ctx.strokeStyle = p.color;
+        ctx.lineWidth = 0.7;
+        const s = Math.max(1.5, p.size * 1.2);
+        ctx.beginPath();
+        ctx.moveTo(p.x - s, p.y);
+        ctx.lineTo(p.x + s, p.y);
+        ctx.moveTo(p.x, p.y - s);
+        ctx.lineTo(p.x, p.y + s);
+        ctx.stroke();
       }
     }
 
@@ -891,7 +858,7 @@
   const endCharge = () => {
     charge = null;
     if (suppressClick) {
-      window.setTimeout(() => { suppressClick = false; }, 400);
+      window.setTimeout(() => { suppressClick = false; }, 500);
     }
   };
   canvas.addEventListener("pointerup", endCharge);
