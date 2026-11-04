@@ -25,7 +25,7 @@
   ];
   const FIREWORK_TYPES = [
     "peony", "peony", "peony", "chrysanthemum", "chrysanthemum",
-    "willow", "willow", "crossette", "palm"
+    "willow", "willow", "heart", "clover", "crossette", "palm"
   ];
   const LABELS = {
     fireworks: "烟花 · Fireworks",
@@ -125,6 +125,11 @@
     return [x / 18, y / 18];
   }
 
+  function cloverPoint(t) {
+    const r = 0.42 + 0.58 * Math.abs(Math.cos(2 * t));
+    return [Math.cos(t) * r, Math.sin(t) * r];
+  }
+
   function launchShell(x, y, scale) {
     if (reduced) return;
     const targetX = clamp(x, 26, W - 26);
@@ -154,6 +159,11 @@
     }
 
     const colors = pick(FIREWORK_SETS);
+    const shapeColors = type === "heart"
+      ? ["#ff2d55", "#ff7aa8", "#ffd60a", "#ffffff"]
+      : type === "clover"
+      ? ["#30d158", "#00e5a0", "#c7f464", "#ffd700", "#ffffff"]
+      : colors;
     let n = 300;
     let speed = 5.4;
     let life = 3.4;
@@ -166,14 +176,20 @@
     if (type === "ring") { n = 260; speed = 5.0; life = 3.2; gravity = 1.5; size = 1.6; }
     if (type === "crossette") { n = 150; speed = 5.4; life = 3.2; gravity = 2.8; size = 1.7; }
     if (type === "palm") { n = 100; speed = 5.2; life = 3.8; gravity = 1.2; size = 2.6; }
+    if (type === "heart") { n = 250; life = 4.2; gravity = 0.8; drag = 0.996; size = 1.9; }
+    if (type === "clover") { n = 270; life = 4.2; gravity = 0.7; drag = 0.996; size = 1.9; }
 
     for (let i = 0; i < n; i++) {
       let vx;
       let vy;
       if (type === "heart") {
-        const [hx, hy] = heartPoint((i / n) * Math.PI * 2);
-        vx = hx * 7.0 * scale;
-        vy = hy * 7.0 * scale;
+        const [hx, hy] = heartPoint((i / n) * Math.PI * 2 + rnd(-0.012, 0.012));
+        vx = hx * 4.1 * scale;
+        vy = hy * 4.1 * scale;
+      } else if (type === "clover") {
+        const [cx, cy] = cloverPoint((i / n) * Math.PI * 2 + rnd(-0.012, 0.012));
+        vx = cx * 4.1 * scale;
+        vy = cy * 4.1 * scale;
       } else if (type === "ring") {
         const a = (i / n) * Math.PI * 2;
         vx = Math.cos(a) * speed * scale;
@@ -185,21 +201,21 @@
         vy = Math.sin(a) * s;
       }
       const r = Math.random();
-      const color = r < 0.72 ? colors[0] : r < 0.94 ? colors[1] : "#ffffff";
-      const p = makeParticle(x, y, vx, vy, life * rnd(0.78, 1.12), color,
+      const color = r < 0.72 ? shapeColors[0] : r < 0.94 ? shapeColors[1] : "#ffffff";
+      const p = makeParticle(x, y, vx, vy, life * rnd(0.82, 1.12), color,
         size * rnd(0.62, 1.28), gravity * rnd(0.85, 1.15), drag, "spark");
       p.split = type === "crossette" && i % 2 === 0;
       addParticle(p);
     }
 
-    flash(x, y, 1.55 * scale, colors[0]);
-    shocks.push({ x, y, t: 0, life: 0.65, max: 96 * scale, color: colors[0] });
+    flash(x, y, 1.55 * scale, shapeColors[0]);
+    shocks.push({ x, y, t: 0, life: 0.65, max: 96 * scale, color: shapeColors[0] });
 
     for (let i = 0; i < 24; i++) {
       const a = rnd(0, Math.PI * 2);
       const s = rnd(0.5, 2.2);
       addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
-        rnd(0.3, 0.8), pick(["#ffffff", "#ffd60a", colors[1]]),
+        rnd(0.3, 0.8), pick(["#ffffff", "#ffd60a", shapeColors[1]]),
         rnd(0.6, 1.2), 28, 0.98, "spark"));
     }
   }
