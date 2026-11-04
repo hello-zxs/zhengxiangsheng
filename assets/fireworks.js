@@ -8,6 +8,7 @@
   const canvas = document.createElement("canvas");
   canvas.className = "fireworks-canvas";
   canvas.setAttribute("aria-hidden", "true");
+  canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:400;";
   document.body.appendChild(canvas);
 
   const ctx = canvas.getContext("2d");
