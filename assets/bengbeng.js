@@ -24,8 +24,8 @@
     ["#ffffff", "#ffd60a", "#ff9f0a"]
   ];
   const FIREWORK_TYPES = [
-    "peony", "peony", "chrysanthemum", "chrysanthemum",
-    "willow", "ring", "ring", "crossette", "palm"
+    "peony", "peony", "peony", "chrysanthemum", "chrysanthemum",
+    "willow", "willow", "crossette", "palm"
   ];
   const LABELS = {
     fireworks: "烟花 · Fireworks",
@@ -49,7 +49,7 @@
   const shocks = [];
   const fireballs = [];
   const rockets = [];
-  const crackers = [];
+  const strings = [];
   const bombs = [];
 
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -128,7 +128,7 @@
       x1: targetX,
       y1: targetY,
       t: 0,
-      fly: rnd(0.42, 0.58),
+      fly: rnd(0.32, 0.44),
       type: pick(FIREWORK_TYPES),
       scale: scale || 1,
       trailClock: 0
@@ -147,18 +147,18 @@
     }
 
     const colors = pick(FIREWORK_SETS);
-    let n = 160;
-    let speed = 3.3;
-    let life = 2.1;
-    let gravity = 20;
-    let drag = 0.986;
-    let size = 1.5;
+    let n = 220;
+    let speed = 5.4;
+    let life = 2.5;
+    let gravity = 8.5;
+    let drag = 0.988;
+    let size = 1.7;
 
-    if (type === "chrysanthemum") { n = 195; speed = 3.7; life = 2.35; gravity = 15; size = 1.45; }
-    if (type === "willow") { n = 145; speed = 2.9; life = 2.9; gravity = 7; drag = 0.993; size = 1.3; }
-    if (type === "ring") { n = 155; speed = 3.1; life = 2.0; gravity = 8; size = 1.45; }
-    if (type === "crossette") { n = 76; speed = 3.6; life = 2.1; gravity = 18; size = 1.55; }
-    if (type === "heart") { n = 128; speed = 3.0; life = 2.35; gravity = 9; size = 1.5; }
+    if (type === "chrysanthemum") { n = 250; speed = 5.8; life = 2.7; gravity = 7; size = 1.6; }
+    if (type === "willow") { n = 180; speed = 4.8; life = 3.4; gravity = 4.5; drag = 0.993; size = 1.4; }
+    if (type === "ring") { n = 200; speed = 5.0; life = 2.3; gravity = 5; size = 1.6; }
+    if (type === "crossette") { n = 110; speed = 5.4; life = 2.4; gravity = 9; size = 1.7; }
+    if (type === "palm") { n = 75; speed = 5.2; life = 2.9; gravity = 5.5; size = 2.6; }
 
     for (let i = 0; i < n; i++) {
       let vx;
@@ -172,8 +172,8 @@
         vx = Math.cos(a) * speed * scale;
         vy = Math.sin(a) * speed * scale * 0.64;
       } else {
-        const a = rnd(0, Math.PI * 2);
-        const s = rnd(0.22, 1) * speed * scale;
+        const a = (i / n) * Math.PI * 2 + rnd(-0.018, 0.018);
+        const s = speed * scale * Math.sqrt(rnd(0.1, 1));
         vx = Math.cos(a) * s;
         vy = Math.sin(a) * s;
       }
@@ -185,8 +185,8 @@
       addParticle(p);
     }
 
-    flash(x, y, 1.3 * scale, colors[0]);
-    shocks.push({ x, y, t: 0, life: 0.55, max: 62 * scale, color: colors[0] });
+    flash(x, y, 1.55 * scale, colors[0]);
+    shocks.push({ x, y, t: 0, life: 0.65, max: 96 * scale, color: colors[0] });
 
     for (let i = 0; i < 5; i++) {
       addSmoke(makeSmoke(x + rnd(-8, 8), y + rnd(-4, 8),
@@ -237,55 +237,90 @@
 
   function firecracker(x, y) {
     if (reduced) return;
-    if (crackers.length > 4) crackers.shift();
-    crackers.push({
-      x: clamp(x, 48, W - 48),
-      y: clamp(y, H * 0.42, H - 42),
-      t: 0,
-      fuse: 0.72,
-      boom: false,
-      rot: rnd(-0.14, 0.14),
-      scale: 1.55
-    });
+    if (strings.length > 1) strings.shift();
+    const n = 18;
+    const anchorX = clamp(x, 78, W - 78);
+    const topY = clamp(y - 135, 22, H - 270);
+    const length = Math.min(260, H - topY - 32);
+    const items = [];
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+      const sway = Math.sin(t * Math.PI * 1.35) * 14;
+      items.push({
+        x: anchorX + sway,
+        y: topY + length * t,
+        delay: (n - 1 - i) * 0.072,
+        popped: false,
+        rot: Math.sin(t * Math.PI) * 0.1
+      });
+    }
+    strings.push({ items, t: 0, anchorX, topY, length });
     startLoop();
   }
 
-  function drawCracker(c) {
+  function drawString(s) {
     ctx.globalCompositeOperation = "source-over";
-    const s = c.scale || 1;
-    ctx.save();
-    ctx.translate(c.x, c.y);
-    ctx.rotate(c.rot);
-    ctx.globalAlpha = 1;
+    const items = s.items;
+    if (!items.length) return;
 
-    ctx.fillStyle = "#b51f1a";
-    ctx.fillRect(-6 * s, -13 * s, 12 * s, 26 * s);
-    ctx.fillStyle = "#e8c76a";
-    ctx.fillRect(-6 * s, -13 * s, 12 * s, 4 * s);
-    ctx.fillRect(-6 * s, 9 * s, 12 * s, 4 * s);
-    ctx.fillStyle = "rgba(255,255,255,0.3)";
-    ctx.fillRect(-2.5 * s, -9 * s, 2 * s, 18 * s);
-    ctx.fillStyle = "rgba(0,0,0,0.28)";
-    ctx.fillRect(3.5 * s, -10 * s, 2.2 * s, 20 * s);
-
-    ctx.strokeStyle = "#6b4a24";
-    ctx.lineWidth = 1.8;
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = "#d8b05c";
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(0, -13 * s);
-    ctx.quadraticCurveTo(7, -23 * s, 3, -32 * s);
+    ctx.moveTo(s.anchorX, s.topY);
+    for (const it of items) ctx.quadraticCurveTo(it.x, it.y, it.x, it.y);
     ctx.stroke();
 
-    const spark = 1.4 + Math.random() * 1.9;
-    ctx.globalCompositeOperation = "lighter";
-    ctx.fillStyle = "#ffd60a";
+    ctx.globalAlpha = 0.7;
+    ctx.strokeStyle = "#7a5426";
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.arc(3, -32 * s, spark, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#ffffff";
+    ctx.moveTo(s.anchorX - 28, s.topY - 8);
+    ctx.lineTo(s.anchorX + 28, s.topY - 8);
+    ctx.stroke();
+    ctx.fillStyle = "#d8b05c";
     ctx.beginPath();
-    ctx.arc(3, -32 * s, spark * 0.4, 0, Math.PI * 2);
+    ctx.arc(s.anchorX, s.topY - 8, 2.4, 0, Math.PI * 2);
     ctx.fill();
-    ctx.restore();
+
+    ctx.globalAlpha = 0.32;
+    ctx.strokeStyle = "#8c642f";
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(s.anchorX + 2, s.topY);
+    for (const it of items) ctx.quadraticCurveTo(it.x + 2, it.y, it.x + 2, it.y);
+    ctx.stroke();
+
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (it.popped) {
+        ctx.globalAlpha = 0.25;
+        ctx.fillStyle = "#2a1a12";
+        ctx.fillRect(it.x - 2, it.y - 2, 4, 5);
+        continue;
+      }
+      ctx.save();
+      ctx.translate(it.x, it.y);
+      ctx.rotate(it.rot);
+      ctx.globalAlpha = 0.98;
+
+      ctx.fillStyle = "#b51f1a";
+      ctx.fillRect(-3.5, -7, 7, 14);
+      ctx.fillStyle = "#e8c76a";
+      ctx.fillRect(-3.5, -7, 7, 2.2);
+      ctx.fillRect(-3.5, 4.8, 7, 2.2);
+      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.fillRect(-1.2, -5, 1.2, 10);
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.fillRect(2, -5.5, 1.2, 11);
+      ctx.strokeStyle = "#6b4a24";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, -7);
+      ctx.lineTo(0, -11);
+      ctx.stroke();
+      ctx.restore();
+    }
     ctx.globalAlpha = 1;
   }
 
@@ -431,7 +466,7 @@
 
   function active() {
     return particles.length || smoke.length || flashes.length || shocks.length ||
-      fireballs.length || rockets.length || crackers.length || bombs.length;
+      fireballs.length || rockets.length || strings.length || bombs.length;
   }
 
   function tick(now) {
@@ -471,18 +506,20 @@
       }
     }
 
-    for (let i = crackers.length - 1; i >= 0; i--) {
-      const c = crackers[i];
-      c.t += dt;
-      if (!c.boom && c.t >= c.fuse) {
-        c.boom = true;
-        popCracker(c.x, c.y, c.scale);
+    for (let i = strings.length - 1; i >= 0; i--) {
+      const s = strings[i];
+      s.t += dt;
+      for (const it of s.items) {
+        if (!it.popped && s.t >= it.delay) {
+          it.popped = true;
+          popCracker(it.x, it.y, 0.9);
+        }
       }
-      if (c.boom) {
-        if (c.t >= c.fuse + 0.1) crackers.splice(i, 1);
-        continue;
+      if (s.items.every((it) => it.popped) && s.t > s.items[s.items.length - 1].delay + 0.35) {
+        strings.splice(i, 1);
+      } else {
+        drawString(s);
       }
-      drawCracker(c);
     }
 
     for (let i = bombs.length - 1; i >= 0; i--) {
@@ -577,7 +614,7 @@
       p.life -= dt;
       if (p.life <= 0) { particles.splice(i, 1); continue; }
       p.history.push([p.x, p.y]);
-      if (p.history.length > 3) p.history.shift();
+      if (p.history.length > 7) p.history.shift();
       p.vx *= Math.pow(p.drag, dt * 60);
       p.vy *= Math.pow(p.drag, dt * 60);
       p.vy += p.gravity * dt;
@@ -594,8 +631,7 @@
       const width = Math.max(0.6, p.size * (0.45 + 0.8 * k));
       const h = p.history;
 
-      if (p.kind === "debris") {
-        ctx.globalCompositeOperation = "source-over";
+      if (p.kind === "debris") {        ctx.globalCompositeOperation = "source-over";
         ctx.globalAlpha = alpha * 0.9;
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x - p.size * 0.5, p.y - p.size * 0.5, p.size, p.size);
@@ -603,41 +639,32 @@
         continue;
       }
 
-      ctx.globalAlpha = alpha * 0.12;
+      ctx.globalAlpha = alpha * 0.1;
       ctx.fillStyle = p.color;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, width * 2.3, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, width * 3.2, 0, Math.PI * 2);
       ctx.fill();
 
-      for (let j = 1; j < h.length; j++) {
-        const t = j / h.length;
-        ctx.globalAlpha = alpha * (0.12 + 0.75 * t);
-        ctx.strokeStyle = p.color;
-        ctx.lineWidth = Math.max(0.4, width * (0.22 + 0.7 * t));
-        ctx.beginPath();
-        ctx.moveTo(h[j - 1][0], h[j - 1][1]);
-        ctx.lineTo(h[j][0], h[j][1]);
-        ctx.stroke();
-      }
       if (h.length) {
-        ctx.globalAlpha = alpha * 0.75;
+        ctx.globalAlpha = alpha * 0.55;
         ctx.strokeStyle = p.color;
-        ctx.lineWidth = Math.max(0.45, width * 0.6);
+        ctx.lineWidth = Math.max(0.8, width * 0.65);
         ctx.beginPath();
-        ctx.moveTo(h[h.length - 1][0], h[h.length - 1][1]);
+        ctx.moveTo(h[0][0], h[0][1]);
+        for (let j = 1; j < h.length; j++) ctx.lineTo(h[j][0], h[j][1]);
         ctx.lineTo(p.x, p.y);
         ctx.stroke();
       }
 
-      if (p.size > 1.0) {
+      if (p.size > 0.9) {
         ctx.globalAlpha = alpha;
         ctx.fillStyle = p.color;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(1, p.size * 0.65), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(1, p.size * 0.62), 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(0.4, p.size * 0.25), 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, Math.max(0.45, p.size * 0.26), 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -665,6 +692,9 @@
       window.setTimeout(() => {
         launchShell(x + rnd(-120, 120), y + rnd(-58, 52), rnd(0.55, 0.75));
       }, rnd(160, 260));
+      window.setTimeout(() => {
+        launchShell(x + rnd(-150, 150), y + rnd(-70, 62), rnd(0.42, 0.58));
+      }, rnd(320, 410));
     }
     if (mode === "firecracker") firecracker(x, y);
     if (mode === "bomb") bomb(x, y);
@@ -678,7 +708,7 @@
     shocks.length = 0;
     fireballs.length = 0;
     rockets.length = 0;
-    crackers.length = 0;
+    strings.length = 0;
     bombs.length = 0;
     running = false;
     ctx.clearRect(0, 0, W, H);

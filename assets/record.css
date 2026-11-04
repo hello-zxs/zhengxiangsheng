@@ -374,7 +374,7 @@ body.menu-open .menu-toggle__close {
 .bengbeng__stage {
   position: relative;
   isolation: isolate;
-  height: clamp(350px, 46vw, 470px);
+  height: clamp(380px, 48vw, 520px);
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 118%, rgba(31, 58, 147, 0.32), transparent 58%),
