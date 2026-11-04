@@ -42,6 +42,8 @@
   let last = 0;
   let mode = "fireworks";
   let shakeTimer = 0;
+  let charge = null;
+  let suppressClick = false;
 
   const particles = [];
   const smoke = [];
@@ -75,12 +77,17 @@
 
   function setMode(next) {
     mode = next;
+    charge = null;
     modeButtons.forEach((b) => {
       const on = b.dataset.mode === next;
       b.classList.toggle("is-active", on);
       b.setAttribute("aria-pressed", String(on));
     });
-    setStatus(LABELS[next] + " — click the stage, or press Ignite.");
+    if (next === "fireworks") {
+      setStatus("烟花 · Fireworks — click for a shell, hold for a grand one.");
+    } else {
+      setStatus(LABELS[next] + " — click the stage, or press Ignite.");
+    }
   }
 
   function addParticle(p) {
@@ -201,8 +208,111 @@
     }
   }
 
-  function popCracker(x, y, scale) {
-    scale = scale || 1;
+  function launchGrand(x, y) {
+    if (reduced) return;
+    rockets.push({
+      x0: clamp(x + rnd(-18, 18), 18, W - 18),
+      y0: H + 8,
+      x1: clamp(x, 42, W - 42),
+      y1: clamp(y, 46, H - 58),
+      t: 0,
+      fly: 0.62,
+      type: "grand",
+      scale: 1,
+      grand: true,
+      trailClock: 0
+    });
+    startLoop();
+  }
+
+  function grandBurst(x, y) {
+    if (reduced) return;
+    const gold = ["#ffd700", "#ffe9a8", "#fffbe6", "#ffffff"];
+    const jewel = ["#4169e1", "#8b1e3f", "#1f7a5a", "#bf9b30", "#ffd700"];
+
+    flash(x, y, 3.0, "#ffd700");
+    shocks.push({ x, y, t: 0, life: 1.0, max: 270, color: "#ffd700" });
+    shocks.push({ x, y, t: 0.08, life: 0.85, max: 205, color: "#ffffff" });
+    shocks.push({ x, y, t: 0.18, life: 0.75, max: 150, color: "#bf9b30" });
+
+    for (let i = 0; i < 320; i++) {
+      const a = (i / 320) * Math.PI * 2 + rnd(-0.01, 0.01);
+      const s = 6.4 * Math.sqrt(rnd(0.12, 1));
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(2.9, 3.5), pick(gold), rnd(1.4, 2.4), 3.8, 0.991, "spark"));
+    }
+
+    for (let i = 0; i < 100; i++) {
+      const a = (i / 100) * Math.PI * 2 + rnd(-0.02, 0.02);
+      const s = 3.2 * Math.sqrt(rnd(0.1, 1));
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(3.0, 3.8), pick(["#ffd700", "#e6b84a", "#ffe9a8"]),
+        rnd(1.0, 1.8), 2.0, 0.993, "spark"));
+    }
+
+    window.setTimeout(() => {
+      if (reduced) return;
+      for (let i = 0; i < 180; i++) {
+        const a = (i / 180) * Math.PI * 2 + rnd(-0.02, 0.02);
+        const s = 4.0 * Math.sqrt(rnd(0.15, 1));
+        addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+          rnd(2.5, 3.0), pick(jewel), rnd(1.1, 2.0), 4.2, 0.99, "spark"));
+      }
+    }, 130);
+
+    window.setTimeout(() => {
+      if (reduced) return;
+      for (let i = 0; i < 140; i++) {
+        const a = (i / 140) * Math.PI * 2;
+        addParticle(makeParticle(x, y,
+          Math.cos(a) * 5.8, Math.sin(a) * 5.8 * 0.66,
+          rnd(2.6, 3.0), pick(["#fffbe6", "#ffd700", "#ffffff"]),
+          rnd(1.2, 2.0), 2.4, 0.993, "spark"));
+      }
+    }, 240);
+
+    window.setTimeout(() => {
+      if (reduced) return;
+      for (let i = 0; i < 110; i++) {
+        const a = rnd(0, Math.PI * 2);
+        const s = rnd(1.2, 5.2);
+        addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+          rnd(0.9, 1.7), pick(["#ffffff", "#ffe9a8", "#ffd700"]),
+          rnd(0.6, 1.2), 5, 0.985, "spark"));
+      }
+    }, 330);
+
+    for (let i = 0; i < 30; i++) {
+      addSmoke(makeSmoke(x + rnd(-24, 24), y + rnd(-10, 18),
+        rnd(-16, 16), rnd(-18, 2), rnd(1.6, 3.0), rnd(16, 34)));
+    }
+  }
+
+  function drawCharge() {
+    if (!charge) return;
+    const p = Math.min(1, charge.t / charge.duration);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = "#ffd700";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(charge.x, charge.y, 24, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 0.95;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(charge.x, charge.y, 24, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p);
+    ctx.stroke();
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = "#ffd700";
+    ctx.font = '9px "Inter", system-ui, sans-serif';
+    ctx.textAlign = "center";
+    ctx.fillText("HOLD", charge.x, charge.y + 42);
+    ctx.globalAlpha = 1;
+  }
+
+  function popCracker(x, y, scale) {    scale = scale || 1;
     flash(x, y, 0.75 * scale, "#ff2d55");
     shocks.push({ x, y, t: 0, life: 0.5, max: 72 * scale, color: "#ffd60a" });
     for (let i = 0; i < 42; i++) {
@@ -438,20 +548,20 @@
 
   function drawRocket(r) {
     ctx.globalCompositeOperation = "lighter";
-    ctx.globalAlpha = 0.32;
-    ctx.strokeStyle = "#ffb347";
-    ctx.lineWidth = 1.2;
+    ctx.globalAlpha = r.grand ? 0.5 : 0.32;
+    ctx.strokeStyle = r.grand ? "#ffe9a8" : "#ffb347";
+    ctx.lineWidth = r.grand ? 2.2 : 1.2;
     ctx.beginPath();
     ctx.moveTo(r.x0, r.y0);
     ctx.lineTo(r.x, r.y);
     ctx.stroke();
 
-    const glow = 5.5;
+    const glow = r.grand ? 9 : 5.5;
     const g = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, glow * 2.2);
     g.addColorStop(0, "rgba(255,255,245,0.95)");
-    g.addColorStop(0.3, "rgba(255,214,10,0.6)");
+    g.addColorStop(0.3, r.grand ? "rgba(255,215,0,0.7)" : "rgba(255,214,10,0.6)");
     g.addColorStop(1, "rgba(255,120,0,0)");
-    ctx.globalAlpha = 0.8;
+    ctx.globalAlpha = 0.85;
     ctx.fillStyle = g;
     ctx.beginPath();
     ctx.arc(r.x, r.y, glow * 2.2, 0, Math.PI * 2);
@@ -459,14 +569,14 @@
     ctx.globalAlpha = 0.95;
     ctx.fillStyle = "#ffffff";
     ctx.beginPath();
-    ctx.arc(r.x, r.y, 1.8, 0, Math.PI * 2);
+    ctx.arc(r.x, r.y, r.grand ? 2.6 : 1.8, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
 
   function active() {
     return particles.length || smoke.length || flashes.length || shocks.length ||
-      fireballs.length || rockets.length || strings.length || bombs.length;
+      fireballs.length || rockets.length || strings.length || bombs.length || charge;
   }
 
   function tick(now) {
@@ -478,6 +588,16 @@
     last = now;
 
     ctx.clearRect(0, 0, W, H);
+
+    if (charge) {
+      charge.t += dt;
+      if (charge.t >= charge.duration) {
+        const c = charge;
+        charge = null;
+        suppressClick = true;
+        launchGrand(c.x, c.y);
+      }
+    }
 
     // rockets, crackers and bombs are solid props
     for (let i = rockets.length - 1; i >= 0; i--) {
@@ -499,7 +619,11 @@
       }
 
       if (k >= 1) {
-        burst(r.x1, r.y1, r.scale, r.type);
+        if (r.grand) {
+          grandBurst(r.x1, r.y1);
+        } else {
+          burst(r.x1, r.y1, r.scale, r.type);
+        }
         rockets.splice(i, 1);
       } else {
         drawRocket(r);
@@ -669,6 +793,7 @@
       }
     }
 
+    drawCharge();
     ctx.globalAlpha = 1;
     ctx.globalCompositeOperation = "source-over";
 
@@ -710,6 +835,8 @@
     rockets.length = 0;
     strings.length = 0;
     bombs.length = 0;
+    charge = null;
+    suppressClick = false;
     running = false;
     ctx.clearRect(0, 0, W, H);
     stage.classList.remove("is-shaking");
@@ -736,11 +863,48 @@
   if (clearBtn) clearBtn.addEventListener("click", clearAll);
 
   canvas.addEventListener("click", (event) => {
+    if (suppressClick) {
+      suppressClick = false;
+      return;
+    }
     const rect = canvas.getBoundingClientRect();
     ignite(event.clientX - rect.left, event.clientY - rect.top);
   });
 
+  canvas.addEventListener("pointerdown", (event) => {
+    if (mode !== "fireworks" || reduced || event.button !== 0) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    charge = { x, y, sx: x, sy: y, t: 0, duration: 0.72 };
+    startLoop();
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    if (!charge) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    if (Math.hypot(x - charge.sx, y - charge.sy) > 14) charge = null;
+  });
+
+  const endCharge = () => {
+    charge = null;
+    if (suppressClick) {
+      window.setTimeout(() => { suppressClick = false; }, 400);
+    }
+  };
+  canvas.addEventListener("pointerup", endCharge);
+  canvas.addEventListener("pointercancel", endCharge);
+  canvas.addEventListener("pointerleave", endCharge);
+  canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+
   canvas.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && event.shiftKey) {
+      event.preventDefault();
+      launchGrand(W * 0.5, H * 0.4);
+      return;
+    }
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       ignite(W * 0.5, H * 0.42);
