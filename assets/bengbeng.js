@@ -16,17 +16,20 @@
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const FIREWORK_SETS = [
-    ["#ff2d55", "#ffd60a", "#00e5ff"],
-    ["#ff9f0a", "#ff375f", "#bf5af2"],
-    ["#30d158", "#64d2ff", "#ffd60a"],
-    ["#0a84ff", "#bf5af2", "#ff2d55"],
-    ["#ff2d55", "#ffd60a", "#30d158"],
-    ["#64d2ff", "#ffffff", "#0a84ff"]
+    ["#ff3b30", "#ffd60a", "#ffffff"],
+    ["#0a84ff", "#64d2ff", "#ffffff"],
+    ["#30d158", "#ffd60a", "#ffffff"],
+    ["#bf5af2", "#ff2d55", "#ffffff"],
+    ["#ff9f0a", "#ffd60a", "#ffffff"],
+    ["#ffffff", "#ffd60a", "#ff9f0a"]
   ];
-  const FIREWORK_TYPES = ["peony", "ring", "willow", "heart", "double", "crossette", "chrysanthemum"];
+  const FIREWORK_TYPES = [
+    "peony", "peony", "chrysanthemum", "chrysanthemum",
+    "willow", "ring", "ring", "crossette", "palm"
+  ];
   const LABELS = {
     fireworks: "烟花 · Fireworks",
-    firecracker: "鞭炮 · Firecrackers",
+    firecracker: "爆竹 · Firecracker",
     bomb: "炸弹 · Bomb"
   };
   const MAX_PARTICLES = 3600;
@@ -45,7 +48,8 @@
   const flashes = [];
   const shocks = [];
   const fireballs = [];
-  const strings = [];
+  const rockets = [];
+  const crackers = [];
   const bombs = [];
 
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -114,75 +118,110 @@
     return [x / 18, y / 18];
   }
 
-  function firework(x, y, scale, type) {
+  function launchShell(x, y, scale) {
+    if (reduced) return;
+    const targetX = clamp(x, 26, W - 26);
+    const targetY = clamp(y, 34, H - 44);
+    rockets.push({
+      x0: clamp(targetX + rnd(-22, 22), 14, W - 14),
+      y0: H + 6,
+      x1: targetX,
+      y1: targetY,
+      t: 0,
+      fly: rnd(0.42, 0.58),
+      type: pick(FIREWORK_TYPES),
+      scale: scale || 1,
+      trailClock: 0
+    });
+    startLoop();
+  }
+
+  function burst(x, y, scale, type) {
     if (reduced) return;
     scale = scale || 1;
     type = type || pick(FIREWORK_TYPES);
     if (type === "double") {
-      firework(x, y, scale * 0.72, "ring");
-      firework(x, y, scale * 1.12, "ring");
+      burst(x, y, scale * 0.72, "ring");
+      burst(x, y, scale * 1.12, "ring");
       return;
     }
 
     const colors = pick(FIREWORK_SETS);
-    let n = 150;
-    let speed = 3.5;
-    let life = 2.2;
+    let n = 160;
+    let speed = 3.3;
+    let life = 2.1;
     let gravity = 20;
     let drag = 0.986;
-    let size = 1.6;
+    let size = 1.5;
 
-    if (type === "chrysanthemum") { n = 180; speed = 3.9; life = 2.4; gravity = 15; size = 1.5; }
-    if (type === "willow") { n = 135; speed = 3.0; life = 3.0; gravity = 7; drag = 0.993; size = 1.35; }
-    if (type === "ring") { n = 145; speed = 3.2; life = 2.15; gravity = 8; size = 1.5; }
-    if (type === "crossette") { n = 68; speed = 3.8; life = 2.2; gravity = 18; size = 1.6; }
-    if (type === "heart") { n = 120; speed = 3.2; life = 2.4; gravity = 9; size = 1.55; }
+    if (type === "chrysanthemum") { n = 195; speed = 3.7; life = 2.35; gravity = 15; size = 1.45; }
+    if (type === "willow") { n = 145; speed = 2.9; life = 2.9; gravity = 7; drag = 0.993; size = 1.3; }
+    if (type === "ring") { n = 155; speed = 3.1; life = 2.0; gravity = 8; size = 1.45; }
+    if (type === "crossette") { n = 76; speed = 3.6; life = 2.1; gravity = 18; size = 1.55; }
+    if (type === "heart") { n = 128; speed = 3.0; life = 2.35; gravity = 9; size = 1.5; }
 
     for (let i = 0; i < n; i++) {
       let vx;
       let vy;
       if (type === "heart") {
         const [hx, hy] = heartPoint((i / n) * Math.PI * 2);
-        vx = hx * 7.4 * scale;
-        vy = hy * 7.4 * scale;
+        vx = hx * 7.0 * scale;
+        vy = hy * 7.0 * scale;
       } else if (type === "ring") {
         const a = (i / n) * Math.PI * 2;
         vx = Math.cos(a) * speed * scale;
         vy = Math.sin(a) * speed * scale * 0.64;
       } else {
         const a = rnd(0, Math.PI * 2);
-        const s = rnd(0.28, 1) * speed * scale;
+        const s = rnd(0.22, 1) * speed * scale;
         vx = Math.cos(a) * s;
         vy = Math.sin(a) * s;
       }
-      const color = colors[i % colors.length];
-      const p = makeParticle(x, y, vx, vy, life * rnd(0.8, 1.15), color,
-        size * rnd(0.65, 1.3), gravity * rnd(0.85, 1.15), drag, "spark");
+      const r = Math.random();
+      const color = r < 0.72 ? colors[0] : r < 0.94 ? colors[1] : "#ffffff";
+      const p = makeParticle(x, y, vx, vy, life * rnd(0.78, 1.12), color,
+        size * rnd(0.62, 1.28), gravity * rnd(0.85, 1.15), drag, "spark");
       p.split = type === "crossette" && i % 2 === 0;
       addParticle(p);
     }
 
-    flash(x, y, 1.15 * scale, colors[0]);
+    flash(x, y, 1.3 * scale, colors[0]);
+    shocks.push({ x, y, t: 0, life: 0.55, max: 62 * scale, color: colors[0] });
 
-    if (type === "peony" || Math.random() < 0.22) {
-      window.setTimeout(() => {
-        firework(x + rnd(-55, 55), y + rnd(-35, 35), scale * 0.42, "ring");
-      }, rnd(90, 180));
+    for (let i = 0; i < 5; i++) {
+      addSmoke(makeSmoke(x + rnd(-8, 8), y + rnd(-4, 8),
+        rnd(-12, 12), rnd(-8, 4), rnd(0.8, 1.5), rnd(8, 16)));
+    }
+    for (let i = 0; i < 24; i++) {
+      const a = rnd(0, Math.PI * 2);
+      const s = rnd(0.5, 2.2);
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(0.3, 0.8), pick(["#ffffff", "#ffd60a", colors[1]]),
+        rnd(0.6, 1.2), 28, 0.98, "spark"));
     }
   }
 
-  function popCracker(x, y) {
-    flash(x, y, 0.22, "#ffd60a");
-    for (let i = 0; i < 14; i++) {
+  function popCracker(x, y, scale) {
+    scale = scale || 1;
+    flash(x, y, 0.75 * scale, "#ff2d55");
+    shocks.push({ x, y, t: 0, life: 0.5, max: 72 * scale, color: "#ffd60a" });
+    for (let i = 0; i < 42; i++) {
       const a = rnd(0, Math.PI * 2);
-      const s = rnd(0.7, 4.2);
+      const s = rnd(0.8, 5.2) * scale;
       addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
-        rnd(0.3, 0.7), pick(["#ff2d55", "#ffd60a", "#ffffff", "#ff9f0a"]),
-        rnd(0.8, 1.7), 42, 0.976, "spark"));
+        rnd(0.3, 0.85), pick(["#ff2d55", "#ffd60a", "#ffffff", "#ff9f0a"]),
+        rnd(0.8, 2.0), 44, 0.976, "spark"));
     }
-    for (let i = 0; i < 2; i++) {
-      addSmoke(makeSmoke(x + rnd(-4, 4), y - 2, rnd(-4, 4), rnd(-10, -3),
-        rnd(0.5, 0.9), rnd(6, 11)));
+    for (let i = 0; i < 20; i++) {
+      const a = rnd(0, Math.PI * 2);
+      const s = rnd(1, 4.5) * scale;
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(0.5, 1.1), pick(["#c81e1e", "#ffd60a", "#f2e6c9"]),
+        rnd(1.2, 2.8), 50, 0.99, "debris"));
+    }
+    for (let i = 0; i < 7; i++) {
+      addSmoke(makeSmoke(x + rnd(-8, 8), y - 2, rnd(-8, 8), rnd(-16, -5),
+        rnd(1.0, 1.8), rnd(9, 18)));
     }
   }
 
@@ -198,64 +237,62 @@
 
   function firecracker(x, y) {
     if (reduced) return;
-    if (strings.length > 2) strings.shift();
-    const n = 18;
-    const gap = Math.min(26, (W - 72) / n);
-    const total = (n - 1) * gap;
-    const start = clamp(x - total / 2, 24, W - 24 - total);
-    const yy = clamp(y + 24, H * 0.55, H - 34);
-    const items = [];
-    for (let i = 0; i < n; i++) {
-      items.push({ x: start + i * gap, y: yy, delay: i * 0.075, popped: false });
-    }
-    strings.push({ items, t: 0, done: false, color: "#ffd60a" });
+    if (crackers.length > 4) crackers.shift();
+    crackers.push({
+      x: clamp(x, 48, W - 48),
+      y: clamp(y, H * 0.42, H - 42),
+      t: 0,
+      fuse: 0.72,
+      boom: false,
+      rot: rnd(-0.14, 0.14),
+      scale: 1.55
+    });
     startLoop();
   }
 
-  function drawString(s) {
+  function drawCracker(c) {
     ctx.globalCompositeOperation = "source-over";
-    const items = s.items;
-    if (!items.length) return;
-    ctx.globalAlpha = 0.6;
-    ctx.strokeStyle = "rgba(255, 214, 10, 0.35)";
-    ctx.lineWidth = 1;
+    const s = c.scale || 1;
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.rot);
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = "#b51f1a";
+    ctx.fillRect(-6 * s, -13 * s, 12 * s, 26 * s);
+    ctx.fillStyle = "#e8c76a";
+    ctx.fillRect(-6 * s, -13 * s, 12 * s, 4 * s);
+    ctx.fillRect(-6 * s, 9 * s, 12 * s, 4 * s);
+    ctx.fillStyle = "rgba(255,255,255,0.3)";
+    ctx.fillRect(-2.5 * s, -9 * s, 2 * s, 18 * s);
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.fillRect(3.5 * s, -10 * s, 2.2 * s, 20 * s);
+
+    ctx.strokeStyle = "#6b4a24";
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.moveTo(items[0].x, items[0].y + 7);
-    for (let i = 1; i < items.length; i++) {
-      const a = items[i - 1];
-      const b = items[i];
-      ctx.quadraticCurveTo((a.x + b.x) / 2, a.y + 13, b.x, b.y + 7);
-    }
+    ctx.moveTo(0, -13 * s);
+    ctx.quadraticCurveTo(7, -23 * s, 3, -32 * s);
     ctx.stroke();
 
-    for (let i = 0; i < items.length; i++) {
-      const it = items[i];
-      if (it.popped) {
-        ctx.globalAlpha = 0.32;
-        ctx.fillStyle = "#2a1a12";
-        ctx.fillRect(it.x - 3, it.y, 6, 3);
-        continue;
-      }
-      const tilt = (i % 2 ? 1 : -1) * 0.16;
-      ctx.save();
-      ctx.translate(it.x, it.y);
-      ctx.rotate(tilt);
-      ctx.globalAlpha = 0.95;
-      ctx.fillStyle = "#b51f1a";
-      ctx.fillRect(-3, -8, 6, 15);
-      ctx.fillStyle = "#ffd60a";
-      ctx.fillRect(-3, -8, 6, 3);
-      ctx.fillStyle = "rgba(255,255,255,0.45)";
-      ctx.fillRect(-1, -7, 1, 11);
-      ctx.restore();
-    }
+    const spark = 1.4 + Math.random() * 1.9;
+    ctx.globalCompositeOperation = "lighter";
+    ctx.fillStyle = "#ffd60a";
+    ctx.beginPath();
+    ctx.arc(3, -32 * s, spark, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(3, -32 * s, spark * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
     ctx.globalAlpha = 1;
   }
 
   function bomb(x, y) {
     if (reduced) return;
     if (bombs.length > 2) bombs.shift();
-    bombs.push({ x: clamp(x, 30, W - 30), y: clamp(y, 28, H - 28), t: 0, fuse: 0.62, boom: false });
+    bombs.push({ x: clamp(x, 30, W - 30), y: clamp(y, 28, H - 28), t: 0, fuse: 0.78, boom: false });
     startLoop();
   }
 
@@ -306,35 +343,44 @@
   function explodeBomb(b) {
     if (b.boom) return;
     b.boom = true;
-    flash(b.x, b.y, 2.4, "#ffd60a");
-    fireballs.push({ x: b.x, y: b.y, t: 0, life: 0.85, scale: 1 });
-    shocks.push({ x: b.x, y: b.y, t: 0, life: 1.0, max: 210, color: "#ff9f0a" });
-    shocks.push({ x: b.x, y: b.y, t: 0.08, life: 0.82, max: 145, color: "#ffffff" });
+    flash(b.x, b.y, 3.2, "#ffd60a");
+    for (let i = 0; i < 3; i++) {
+      fireballs.push({
+        x: b.x + rnd(-14, 14),
+        y: b.y + rnd(-12, 12),
+        t: 0,
+        life: rnd(0.55, 0.95),
+        scale: rnd(0.72, 1.25)
+      });
+    }
+    shocks.push({ x: b.x, y: b.y, t: 0, life: 1.05, max: 250, color: "#ff9f0a" });
+    shocks.push({ x: b.x, y: b.y, t: 0.06, life: 0.9, max: 180, color: "#ffffff" });
+    shocks.push({ x: b.x, y: b.y, t: 0.14, life: 0.72, max: 125, color: "#ff2d55" });
 
-    for (let i = 0; i < 95; i++) {
+    for (let i = 0; i < 145; i++) {
       const a = rnd(0, Math.PI * 2);
-      const s = rnd(2, 12);
+      const s = rnd(1.5, 13);
       addParticle(makeParticle(b.x, b.y, Math.cos(a) * s, Math.sin(a) * s,
-        rnd(0.45, 1.1), pick(["#ffd60a", "#ff9f0a", "#ff2d55", "#ffffff"]),
-        rnd(1, 2.8), 34, 0.975, "spark"));
+        rnd(0.4, 1.15), pick(["#ffd60a", "#ff9f0a", "#ff2d55", "#ffffff"]),
+        rnd(0.9, 3.0), 34, 0.975, "spark"));
     }
-    for (let i = 0; i < 22; i++) {
+    for (let i = 0; i < 38; i++) {
       const a = rnd(0, Math.PI * 2);
-      const s = rnd(1.5, 6);
+      const s = rnd(1.5, 7);
       addParticle(makeParticle(b.x, b.y, Math.cos(a) * s, Math.sin(a) * s,
-        rnd(0.5, 1.0), pick(["#2b2b2b", "#3a2a1f", "#1a1a1a"]),
-        rnd(1.2, 3.0), 46, 0.99, "debris"));
+        rnd(0.5, 1.1), pick(["#2b2b2b", "#3a2a1f", "#1a1a1a", "#5a3a20"]),
+        rnd(1.2, 3.4), 48, 0.99, "debris"));
     }
-    for (let i = 0; i < 32; i++) {
-      addSmoke(makeSmoke(b.x + rnd(-18, 18), b.y + rnd(-10, 16),
-        rnd(-18, 18), rnd(-24, -4), rnd(1.2, 2.4), rnd(14, 30)));
+    for (let i = 0; i < 46; i++) {
+      addSmoke(makeSmoke(b.x + rnd(-22, 22), b.y + rnd(-12, 18),
+        rnd(-24, 24), rnd(-28, -2), rnd(1.4, 2.8), rnd(16, 34)));
     }
 
     stage.classList.remove("is-shaking");
     void stage.offsetWidth;
     stage.classList.add("is-shaking");
     window.clearTimeout(shakeTimer);
-    shakeTimer = window.setTimeout(() => stage.classList.remove("is-shaking"), 430);
+    shakeTimer = window.setTimeout(() => stage.classList.remove("is-shaking"), 520);
   }
 
   function splitParticle(p) {
@@ -355,9 +401,37 @@
     requestAnimationFrame(tick);
   }
 
+  function drawRocket(r) {
+    ctx.globalCompositeOperation = "lighter";
+    ctx.globalAlpha = 0.32;
+    ctx.strokeStyle = "#ffb347";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(r.x0, r.y0);
+    ctx.lineTo(r.x, r.y);
+    ctx.stroke();
+
+    const glow = 5.5;
+    const g = ctx.createRadialGradient(r.x, r.y, 0, r.x, r.y, glow * 2.2);
+    g.addColorStop(0, "rgba(255,255,245,0.95)");
+    g.addColorStop(0.3, "rgba(255,214,10,0.6)");
+    g.addColorStop(1, "rgba(255,120,0,0)");
+    ctx.globalAlpha = 0.8;
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(r.x, r.y, glow * 2.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.95;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(r.x, r.y, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
   function active() {
     return particles.length || smoke.length || flashes.length || shocks.length ||
-      fireballs.length || strings.length || bombs.length;
+      fireballs.length || rockets.length || crackers.length || bombs.length;
   }
 
   function tick(now) {
@@ -370,21 +444,45 @@
 
     ctx.clearRect(0, 0, W, H);
 
-    // strings and bombs are solid props
-    for (let i = strings.length - 1; i >= 0; i--) {
-      const s = strings[i];
-      s.t += dt;
-      for (const it of s.items) {
-        if (!it.popped && s.t >= it.delay) {
-          it.popped = true;
-          popCracker(it.x, it.y);
-        }
+    // rockets, crackers and bombs are solid props
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i];
+      r.t += dt;
+      const k = Math.min(1, r.t / r.fly);
+      const ease = 1 - Math.pow(1 - k, 2);
+      r.x = r.x0 + (r.x1 - r.x0) * ease;
+      r.y = r.y0 + (r.y1 - r.y0) * ease;
+      r.trailClock += dt;
+
+      if (r.trailClock > 0.045) {
+        r.trailClock = 0;
+        addParticle(makeParticle(r.x + rnd(-2, 2), r.y + 4,
+          rnd(-8, 8), rnd(12, 34), rnd(0.18, 0.36),
+          pick(["#ffd60a", "#ff9f0a", "#ffffff"]), rnd(0.7, 1.4), 18, 0.97, "spark"));
+        addSmoke(makeSmoke(r.x + rnd(-2, 2), r.y + 6,
+          rnd(-3, 3), rnd(4, 10), rnd(0.35, 0.6), rnd(3, 6)));
       }
-      if (s.items.every((it) => it.popped) && s.t > s.items[s.items.length - 1].delay + 0.3) {
-        strings.splice(i, 1);
+
+      if (k >= 1) {
+        burst(r.x1, r.y1, r.scale, r.type);
+        rockets.splice(i, 1);
       } else {
-        drawString(s);
+        drawRocket(r);
       }
+    }
+
+    for (let i = crackers.length - 1; i >= 0; i--) {
+      const c = crackers[i];
+      c.t += dt;
+      if (!c.boom && c.t >= c.fuse) {
+        c.boom = true;
+        popCracker(c.x, c.y, c.scale);
+      }
+      if (c.boom) {
+        if (c.t >= c.fuse + 0.1) crackers.splice(i, 1);
+        continue;
+      }
+      drawCracker(c);
     }
 
     for (let i = bombs.length - 1; i >= 0; i--) {
@@ -395,9 +493,9 @@
       }
       if (b.boom && b.t >= b.fuse + 0.12) {
         bombs.splice(i, 1);
-      } else {
-        drawBomb(b);
+        continue;
       }
+      if (!b.boom) drawBomb(b);
     }
 
     // flashes and shockwaves
@@ -437,7 +535,7 @@
       f.t += dt;
       const k = f.t / f.life;
       if (k >= 1) { fireballs.splice(i, 1); continue; }
-      const r = safe(18 + 105 * Math.sqrt(k));
+      const r = safe((18 + 105 * Math.sqrt(k)) * f.scale);
       const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
       g.addColorStop(0, "rgba(255,255,245,0.85)");
       g.addColorStop(0.22, "rgba(255,214,10,0.55)");
@@ -479,7 +577,7 @@
       p.life -= dt;
       if (p.life <= 0) { particles.splice(i, 1); continue; }
       p.history.push([p.x, p.y]);
-      if (p.history.length > 4) p.history.shift();
+      if (p.history.length > 3) p.history.shift();
       p.vx *= Math.pow(p.drag, dt * 60);
       p.vy *= Math.pow(p.drag, dt * 60);
       p.vy += p.gravity * dt;
@@ -563,13 +661,10 @@
     x = clamp(x, 18, W - 18);
     y = clamp(y, 18, H - 18);
     if (mode === "fireworks") {
-      firework(x, y, 1.1);
+      launchShell(x, y, 1.1);
       window.setTimeout(() => {
-        firework(x + rnd(-120, 120), y + rnd(-58, 52), rnd(0.52, 0.72));
-      }, rnd(90, 150));
-      window.setTimeout(() => {
-        firework(x + rnd(-135, 135), y + rnd(-62, 55), rnd(0.45, 0.62));
-      }, rnd(210, 300));
+        launchShell(x + rnd(-120, 120), y + rnd(-58, 52), rnd(0.55, 0.75));
+      }, rnd(160, 260));
     }
     if (mode === "firecracker") firecracker(x, y);
     if (mode === "bomb") bomb(x, y);
@@ -582,7 +677,8 @@
     flashes.length = 0;
     shocks.length = 0;
     fireballs.length = 0;
-    strings.length = 0;
+    rockets.length = 0;
+    crackers.length = 0;
     bombs.length = 0;
     running = false;
     ctx.clearRect(0, 0, W, H);
