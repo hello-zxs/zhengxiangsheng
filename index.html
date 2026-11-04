@@ -43,7 +43,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/record.css">
+<link rel="stylesheet" href="assets/record.css?v=20261103d">
 <link rel="stylesheet" href="assets/matrix/matrix.css">
 <script>
   (function () {
@@ -71,6 +71,7 @@
       <a href="#work">Publications<span class="nav-zh zh" lang="zh">论文</span></a>
       <a href="#about">About<span class="nav-zh zh" lang="zh">关于</span></a>
       <a href="#contact">Contact<span class="nav-zh zh" lang="zh">联系</span></a>
+      <a href="#bengbeng">Bengbeng<span class="nav-zh zh" lang="zh">蹦蹦</span></a>
     </nav>
     <div class="header-tools">
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch colour theme">
@@ -96,6 +97,7 @@
     <a href="#work"><span>Publications</span><em>论文</em></a>
     <a href="#about"><span>About</span><em>关于</em></a>
     <a href="#contact"><span>Contact</span><em>联系</em></a>
+    <a href="#bengbeng"><span>Bengbeng</span><em>蹦蹦</em></a>
   </nav>
   <div class="mobile-nav__foot">
     <a href="https://zhengxs.com/">Index ↗</a>
@@ -290,6 +292,40 @@
       <li><a href="https://github.com/hello-zxs"><span>GitHub ↗</span><span class="link-sub">@hello-zxs</span></a></li>
     </ul>
   </section>
+
+  <section class="section wrap bengbeng" id="bengbeng" data-bengbeng>
+    <div class="section-head reveal">
+      <p class="index">06</p>
+      <h2>蹦蹦<span class="zh" lang="en">BENG BENG</span></h2>
+      <p class="section-note">A small pyrotechnic playground. Choose a mode, then click the stage. No sound, no smoke, no danger.</p>
+    </div>
+    <div class="bengbeng__body reveal">
+      <div class="bengbeng__stage" data-bengbeng-stage>
+        <canvas class="bengbeng__canvas" data-bengbeng-canvas tabindex="0"
+          aria-label="Interactive fireworks stage. Choose fireworks, firecrackers or a bomb, then click here or press Enter to ignite."></canvas>
+        <div class="bengbeng__badge" aria-hidden="true">LIVE · NO SOUND</div>
+        <div class="bengbeng__hint" aria-hidden="true">Click the stage</div>
+      </div>
+      <div class="bengbeng__toolbar">
+        <div class="bengbeng__modes" role="group" aria-label="Choose an effect">
+          <button class="bengbeng__mode is-active" type="button" data-mode="fireworks" aria-pressed="true">
+            <span class="bengbeng__mode-cn">烟花</span><span class="bengbeng__mode-en">Fireworks</span>
+          </button>
+          <button class="bengbeng__mode" type="button" data-mode="firecracker" aria-pressed="false">
+            <span class="bengbeng__mode-cn">鞭炮</span><span class="bengbeng__mode-en">Firecrackers</span>
+          </button>
+          <button class="bengbeng__mode" type="button" data-mode="bomb" aria-pressed="false">
+            <span class="bengbeng__mode-cn">炸弹</span><span class="bengbeng__mode-en">Bomb</span>
+          </button>
+        </div>
+        <div class="bengbeng__actions">
+          <button class="bengbeng__ignite" type="button" data-launch>点火 <span>Ignite</span></button>
+          <button class="bengbeng__clear" type="button" data-clear>清空 <span>Clear</span></button>
+        </div>
+      </div>
+      <p class="bengbeng__status" data-bengbeng-status aria-live="polite">烟花 · Fireworks — click the stage, or press Ignite.</p>
+    </div>
+  </section>
 </main>
 
 <footer class="site-footer">
@@ -304,7 +340,7 @@
     <div class="footer-inner">
       <p>© <span id="year">2026</span> Zheng Xiangsheng · 郑翔升</p>
       <p class="footer-note">Academic record · zhengxiangsheng.com · hand-written HTML, CSS and a little JavaScript.</p>
-      <p class="footer-easter">Click anywhere for a small celebration.</p>
+      <p class="footer-easter">Click anywhere for a small celebration — or open 蹦蹦 for the full show.</p>
     </div>
   </div>
 </footer>
@@ -312,5 +348,6 @@
 <script src="assets/app.js" defer></script>
 <script src="assets/matrix/matrix.js" defer></script>
 <script src="assets/fireworks.js" defer></script>
+<script src="assets/bengbeng.js" defer></script>
 </body>
 </html>

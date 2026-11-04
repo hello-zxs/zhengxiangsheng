@@ -298,6 +298,7 @@
     if (event.button !== 0) return;
     if (event.detail === 0 && event.clientX === 0 && event.clientY === 0) return;
     if (!(event.target instanceof Element)) return;
+    if (event.target.closest("#bengbeng")) return;
     if (event.target.closest("input, textarea, select")) return;
     if (typeof event.clientX !== "number") return;
     spawn(event.clientX, event.clientY);
