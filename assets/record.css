@@ -501,7 +501,15 @@ body.menu-open .menu-toggle__close {
 }
 
 .bengbeng__mode.is-active .bengbeng__mode-en {
-  color: rgba(246, 244, 239, 0.66);
+  color: rgba(246, 244, 239, 0.82);
+}
+
+[data-theme="dark"] .bengbeng__mode[data-mode="fireworks"].is-active {
+  color: #0d1020;
+}
+
+[data-theme="dark"] .bengbeng__mode[data-mode="fireworks"].is-active .bengbeng__mode-en {
+  color: rgba(13, 16, 32, 0.78);
 }
 
 .bengbeng__mode[data-mode="firecracker"].is-active {

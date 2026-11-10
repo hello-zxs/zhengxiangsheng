@@ -1,3 +1,26 @@
+/* Typefaces are served from this origin: no third-party font request. */
+@font-face {
+  font-family: "Inter";
+  src: url("fonts/inter-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("fonts/newsreader-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Newsreader";
+  src: url("fonts/newsreader-italic-var.woff2") format("woff2");
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* ============================================================
    zhengxiangsheng.com
    ============================================================ */
@@ -7,7 +30,7 @@
   --bg-soft: #efece4;
   --ink: #15171b;
   --ink-soft: #3c4048;
-  --muted: #6b6f77;
+  --muted: #5f636b;
   --line: rgba(21, 23, 27, 0.14);
   --accent: #a8432a;
   --header-bg: rgba(246, 244, 239, 0.82);
