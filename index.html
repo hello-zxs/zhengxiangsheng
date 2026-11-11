@@ -54,7 +54,7 @@
 <link rel="preload" href="assets/fonts/newsreader-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/record.css?v=20261103q">
+<link rel="stylesheet" href="assets/record.css?v=20261111a">
 <link rel="stylesheet" href="assets/matrix/matrix.css">
 <script>
   (function () {
@@ -311,14 +311,16 @@
     <div class="section-head reveal">
       <p class="index">06</p>
       <h2>蹦蹦<span class="zh" lang="en">BENG BENG</span></h2>
-      <p class="section-note">A small pyrotechnic playground. Choose a mode, then click the stage. Hold longer in fireworks mode for a grand shell. No sound, no smoke, no danger.</p>
+      <p class="section-note">A small pyrotechnic playground. Choose a toy, then tap, hold or drag on the stage: firecrackers can be laid along a line, bombs can be thrown, and every tap of snow is a different crystal. Silent unless you ask.</p>
+      <p class="section-note"><a class="bengbeng__app" href="bengbeng/">Open it as a full-screen app ↗</a></p>
     </div>
     <div class="bengbeng__body reveal">
       <div class="bengbeng__stage" data-bengbeng-stage>
         <canvas class="bengbeng__canvas" data-bengbeng-canvas tabindex="0"
-          aria-label="Interactive fireworks stage. Choose fireworks, firecrackers or a bomb, then click here or press Enter to ignite."></canvas>
-        <div class="bengbeng__badge" aria-hidden="true">LIVE · NO SOUND</div>
-        <div class="bengbeng__hint" aria-hidden="true">CLICK · HOLD</div>
+          aria-label="Play area. Choose fireworks, firecrackers, bombs or snow, then tap, hold or drag here, or press Enter to set one off."></canvas>
+        <div class="bengbeng__badge" aria-hidden="true" data-bengbeng-badge>LIVE · NO SOUND</div>
+        <div class="bengbeng__hint" aria-hidden="true">TAP · HOLD · DRAG</div>
+        <button class="bengbeng__motion" type="button" data-motion hidden>Reduced motion is on · Play anyway</button>
       </div>
       <div class="bengbeng__toolbar">
         <div class="bengbeng__modes" role="group" aria-label="Choose an effect">
@@ -331,9 +333,13 @@
           <button class="bengbeng__mode" type="button" data-mode="bomb" aria-pressed="false">
             <span class="bengbeng__mode-cn">炸弹</span><span class="bengbeng__mode-en">Bomb</span>
           </button>
+          <button class="bengbeng__mode" type="button" data-mode="snow" aria-pressed="false">
+            <span class="bengbeng__mode-cn">雪</span><span class="bengbeng__mode-en">Snow</span>
+          </button>
         </div>
         <div class="bengbeng__actions">
           <button class="bengbeng__ignite" type="button" data-launch>点火 <span>Ignite</span></button>
+          <button class="bengbeng__clear" type="button" data-sound aria-pressed="false">声音 <span><i>Sound </i><b data-sound-label>off</b></span></button>
           <button class="bengbeng__clear" type="button" data-clear>清空 <span>Clear</span></button>
         </div>
       </div>
@@ -354,7 +360,7 @@
     <div class="footer-inner">
       <p>© <span id="year">2026</span> Zheng Xiangsheng · 郑翔升</p>
       <p class="footer-note">Academic record · zhengxiangsheng.com · hand-written HTML, CSS and a little JavaScript.</p>
-      <p class="footer-easter">Click anywhere for a small celebration — or open 蹦蹦 for the full show.</p>
+      <p class="footer-easter">Click anywhere for a small celebration — or open <a href="bengbeng/">蹦蹦</a> for the full show.</p>
     </div>
   </div>
 </footer>
@@ -362,6 +368,6 @@
 <script src="assets/app.js" defer></script>
 <script src="assets/matrix/matrix.js" defer></script>
 <script src="assets/fireworks.js" defer></script>
-<script src="assets/bengbeng.js?v=20261103q" defer></script>
+<script src="bengbeng/engine.js?v=20261111a" defer></script>
 </body>
 </html>

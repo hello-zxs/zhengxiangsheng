@@ -403,7 +403,45 @@ body.menu-open .menu-toggle__close {
   width: 100%;
   height: 100%;
   cursor: crosshair;
-  touch-action: manipulation;
+  touch-action: pan-y;      /* sideways drags lay strings and throw bombs; vertical swipes still scroll the page */
+}
+
+.bengbeng__motion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  transform: translate(-50%, -50%);
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid #ffd60a;
+  background: rgba(7, 8, 11, 0.88);
+  color: #f6f4ef;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.74rem;
+  cursor: pointer;
+}
+
+.bengbeng__motion[hidden] {
+  display: none;
+}
+
+.bengbeng__app {
+  color: var(--accent);
+  text-underline-offset: 0.2em;
+}
+
+.bengbeng__clear[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.bengbeng__clear b {
+  font-weight: 600;
+}
+
+.bengbeng__clear i {
+  font-style: normal;
 }
 
 .bengbeng__badge,
@@ -522,6 +560,11 @@ body.menu-open .menu-toggle__close {
   background: #1b1b1b;
 }
 
+.bengbeng__mode[data-mode="snow"].is-active {
+  border-color: #2f5f8a;
+  background: #2f5f8a;
+}
+
 .bengbeng__ignite,
 .bengbeng__clear {
   min-height: 40px;
@@ -597,9 +640,14 @@ body.menu-open .menu-toggle__close {
 
   .bengbeng__mode {
     flex: 1 1 0;
+    align-items: center;
     justify-content: center;
     padding-inline: 9px;
     font-size: 0.8rem;
+  }
+
+  .bengbeng__clear i {
+    display: none;          /* "声音 off" fits on one line */
   }
 
   .bengbeng__mode-en {

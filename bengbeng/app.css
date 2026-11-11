@@ -1,0 +1,357 @@
+/* 蹦蹦 / BENG BENG — the stand-alone app shell.
+   One screen, no scrolling: a bar, the stage, and four toys along the bottom.
+   System fonts only, so the app needs nothing but its own folder. */
+
+:root {
+  color-scheme: dark;
+  --bg: #05060a;
+  --ink: #f6f4ef;
+  --muted: rgba(246, 244, 239, 0.66);
+  --line: rgba(246, 244, 239, 0.16);
+  --panel: rgba(246, 244, 239, 0.05);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  position: fixed;          /* stops the rubber-band scroll on iOS */
+  inset: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Noto Sans SC", "Segoe UI", Roboto, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* never wider than the screen */
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+}
+
+/* ---------- top bar ---------- */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) calc(env(safe-area-inset-right, 0px) + 12px) 8px
+    calc(env(safe-area-inset-left, 0px) + 14px);
+}
+
+.bar__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.bar__en {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+}
+
+.bar__tools {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tool__en {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.tool b {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tool[aria-pressed="true"] {
+  border-color: #ffd60a;
+  background: rgba(255, 214, 10, 0.14);
+}
+
+/* ---------- stage ---------- */
+.stage {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(circle at 50% 118%, rgba(31, 58, 147, 0.36), transparent 58%),
+    linear-gradient(rgba(246, 244, 239, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(246, 244, 239, 0.03) 1px, transparent 1px),
+    #07080b;
+  background-size: auto, 44px 44px, 44px 44px, auto;
+}
+
+.stage[data-toy="snow"] {
+  background:
+    radial-gradient(circle at 50% 118%, rgba(120, 170, 230, 0.3), transparent 60%),
+    linear-gradient(rgba(246, 244, 239, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(246, 244, 239, 0.03) 1px, transparent 1px),
+    #080b12;
+  background-size: auto, 44px 44px, 44px 44px, auto;
+}
+
+.stage__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;       /* every touch belongs to the game */
+  cursor: crosshair;
+  outline: none;
+}
+
+.stage__canvas:focus-visible {
+  outline: 2px solid #8fa6ff;
+  outline-offset: -4px;
+}
+
+.stage__status {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  left: 0;
+  margin: 0;
+  padding: 0 18px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.stage__motion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100% - 40px);
+  min-height: 48px;
+  padding: 10px 18px;
+  border: 1px solid #ffd60a;
+  border-radius: 14px;
+  background: rgba(5, 6, 10, 0.86);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.install {
+  position: absolute;
+  top: 44px;
+  right: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(10, 12, 18, 0.92);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.install[hidden],
+.stage__motion[hidden],
+.tool[hidden] {
+  display: none;
+}
+
+.install p {
+  margin: 0;
+}
+
+.install__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+/* ---------- the four toys ---------- */
+.modes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 10px)
+    calc(env(safe-area-inset-left, 0px) + 10px);
+}
+
+.mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 62px;
+  padding: 6px 2px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.mode,
+.tool {
+  touch-action: manipulation;   /* no double-tap zoom on the controls */
+}
+
+.mode:active {
+  transform: scale(0.96);
+}
+
+.mode svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mode__cn {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.mode__en {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mode.is-active .mode__en {
+  color: inherit;
+  opacity: 0.8;
+}
+
+.mode.is-active[data-mode="fireworks"] {
+  border-color: #8fa6ff;
+  background: #8fa6ff;
+  color: #0d1020;
+}
+
+.mode.is-active[data-mode="firecracker"] {
+  border-color: #d9322b;
+  background: #b3261e;
+  color: #fff6e8;
+}
+
+.mode.is-active[data-mode="bomb"] {
+  border-color: #ffd60a;
+  background: #1b1b1b;
+  color: #ffd60a;
+}
+
+.mode.is-active[data-mode="snow"] {
+  border-color: #d5ecff;
+  background: #d5ecff;
+  color: #0c1a2c;
+}
+
+.mode:focus-visible,
+.tool:focus-visible,
+.stage__motion:focus-visible {
+  outline: 2px solid #8fa6ff;
+  outline-offset: 2px;
+}
+
+/* a phone held sideways: keep as much stage as possible */
+@media (max-height: 460px) {
+  .bar {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 4px);
+    padding-bottom: 4px;
+  }
+  .mode {
+    flex-direction: row;
+    gap: 7px;
+    min-height: 44px;
+  }
+  .mode__en {
+    display: none;
+  }
+}
+
+/* phones: the Chinese labels carry the bar; English returns when there is room */
+@media (max-width: 520px) {
+  .tool__en {
+    display: none;
+  }
+}
+
+@media (max-width: 350px) {
+  .bar__en {
+    display: none;
+  }
+  .tool {
+    padding: 0 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mode {
+    transition: none;
+  }
+}

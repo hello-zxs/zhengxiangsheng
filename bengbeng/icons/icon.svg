@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0" stop-color="#1b2c6b"/>
+      <stop offset="0.55" stop-color="#0a0f24"/>
+      <stop offset="1" stop-color="#05060a"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g transform="translate(0.0 0.0) scale(1.0)">
+    <line x1="256.0" y1="162.0" x2="256.0" y2="58.0" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="256.0" cy="30.0" r="9" fill="#ff9f0a"/>
+    <line x1="278.2" y1="172.4" x2="300.4" y2="118.8" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <line x1="301.3" y1="180.7" x2="374.8" y2="107.2" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="394.6" cy="87.4" r="9" fill="#ff9f0a"/>
+    <line x1="309.6" y1="203.8" x2="363.2" y2="181.6" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <line x1="320.0" y1="226.0" x2="424.0" y2="226.0" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="452.0" cy="226.0" r="9" fill="#ff9f0a"/>
+    <line x1="309.6" y1="248.2" x2="363.2" y2="270.4" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <line x1="301.3" y1="271.3" x2="374.8" y2="344.8" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="394.6" cy="364.6" r="9" fill="#ff9f0a"/>
+    <line x1="278.2" y1="279.6" x2="300.4" y2="333.2" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <line x1="256.0" y1="290.0" x2="256.0" y2="394.0" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="256.0" cy="422.0" r="9" fill="#ff9f0a"/>
+    <line x1="233.8" y1="279.6" x2="211.6" y2="333.2" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <line x1="210.7" y1="271.3" x2="137.2" y2="344.8" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="117.4" cy="364.6" r="9" fill="#ff9f0a"/>
+    <line x1="202.4" y1="248.2" x2="148.8" y2="270.4" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <line x1="192.0" y1="226.0" x2="88.0" y2="226.0" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="60.0" cy="226.0" r="9" fill="#ff9f0a"/>
+    <line x1="202.4" y1="203.8" x2="148.8" y2="181.6" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <line x1="210.7" y1="180.7" x2="137.2" y2="107.2" stroke="#ffd60a" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="117.4" cy="87.4" r="9" fill="#ff9f0a"/>
+    <line x1="233.8" y1="172.4" x2="211.6" y2="118.8" stroke="#ffffff" stroke-width="15" stroke-linecap="round"/>
+    <circle cx="256" cy="226" r="30" fill="#ffffff"/>
+    <g transform="rotate(-24 128 404)">
+      <rect x="104" y="344" width="48" height="118" rx="9" fill="#c81e1e"/>
+      <rect x="104" y="358" width="48" height="13" fill="#f2c14e"/>
+      <rect x="104" y="434" width="48" height="13" fill="#f2c14e"/>
+      <path d="M128 344 v-18 q0 -14 16 -18" fill="none" stroke="#d9b26a" stroke-width="7" stroke-linecap="round"/>
+    </g>
+    <g stroke="#eaf6ff" stroke-width="11" stroke-linecap="round">
+      <line x1="388" y1="400" x2="388.0" y2="340.0"/>
+      <line x1="388.0" y1="364.0" x2="372.4" y2="355.0"/>
+      <line x1="388.0" y1="364.0" x2="403.6" y2="355.0"/>
+      <line x1="388" y1="400" x2="440.0" y2="370.0"/>
+      <line x1="419.2" y1="382.0" x2="419.2" y2="364.0"/>
+      <line x1="419.2" y1="382.0" x2="434.8" y2="391.0"/>
+      <line x1="388" y1="400" x2="440.0" y2="430.0"/>
+      <line x1="419.2" y1="418.0" x2="434.8" y2="409.0"/>
+      <line x1="419.2" y1="418.0" x2="419.2" y2="436.0"/>
+      <line x1="388" y1="400" x2="388.0" y2="460.0"/>
+      <line x1="388.0" y1="436.0" x2="403.6" y2="445.0"/>
+      <line x1="388.0" y1="436.0" x2="372.4" y2="445.0"/>
+      <line x1="388" y1="400" x2="336.0" y2="430.0"/>
+      <line x1="356.8" y1="418.0" x2="356.8" y2="436.0"/>
+      <line x1="356.8" y1="418.0" x2="341.2" y2="409.0"/>
+      <line x1="388" y1="400" x2="336.0" y2="370.0"/>
+      <line x1="356.8" y1="382.0" x2="341.2" y2="391.0"/>
+      <line x1="356.8" y1="382.0" x2="356.8" y2="364.0"/>
+    </g>
+  </g>
+</svg>

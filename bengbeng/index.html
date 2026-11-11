@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>蹦蹦 BENG BENG — fireworks, firecrackers, bombs and snow</title>
+<meta name="description" content="A small pyrotechnic playground: fireworks, strings of firecrackers, bouncing bombs and eight kinds of snow crystal. Tap, hold, drag and flick. Works offline; add it to your home screen.">
+<meta name="author" content="Zheng Xiangsheng">
+<meta name="theme-color" content="#05060a">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="蹦蹦">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:type" content="website">
+<meta property="og:title" content="蹦蹦 BENG BENG">
+<meta property="og:description" content="Fireworks, firecrackers, bombs and snow. Tap, hold, drag and flick.">
+<meta property="og:url" content="https://zhengxiangsheng.com/bengbeng/">
+<meta property="og:image" content="https://zhengxiangsheng.com/bengbeng/icons/icon-512.png">
+<link rel="canonical" href="https://zhengxiangsheng.com/bengbeng/">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <h1 class="bar__title"><span lang="zh">蹦蹦</span><span class="bar__en">BENG BENG</span></h1>
+    <div class="bar__tools">
+      <button class="tool" type="button" data-sound aria-pressed="false"><span lang="zh">声音</span> <span class="tool__en">Sound</span> <b data-sound-label>off</b></button>
+      <button class="tool" type="button" data-clear><span lang="zh">清空</span> <span class="tool__en">Clear</span></button>
+      <a class="tool" href="/" aria-label="Back to zhengxiangsheng.com"><span lang="zh">主页</span> <span class="tool__en">Home</span></a>
+    </div>
+  </header>
+
+  <main class="stage" data-bengbeng-stage="full">
+    <canvas class="stage__canvas" data-bengbeng-canvas tabindex="0"
+      aria-label="Play area. Choose fireworks, firecrackers, bombs or snow below, then tap, hold or drag here. Press Enter to set one off in the middle."></canvas>
+    <p class="stage__status" data-bengbeng-status aria-live="polite">烟花 · Fireworks</p>
+    <button class="stage__motion" type="button" data-motion hidden>Reduced motion is on · <span lang="zh">仍要播放</span> Play anyway</button>
+    <aside class="install" data-install hidden>
+      <p data-install-text></p>
+      <div class="install__actions">
+        <button class="tool" type="button" data-install-go hidden>Install</button>
+        <button class="tool" type="button" data-install-close aria-label="Dismiss">OK</button>
+      </div>
+    </aside>
+  </main>
+
+  <nav class="modes" aria-label="Choose a toy">
+    <button class="mode is-active" type="button" data-mode="fireworks" aria-pressed="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v5M12 16v5M3 12h5M16 12h5M5.6 5.6l3.5 3.5M14.9 14.9l3.5 3.5M18.4 5.6l-3.5 3.5M9.1 14.9l-3.5 3.5"/></svg>
+      <span class="mode__cn" lang="zh">烟花</span><span class="mode__en">Fireworks</span>
+    </button>
+    <button class="mode" type="button" data-mode="firecracker" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="8" height="13" rx="1.5"/><path d="M8 11.5h8M8 17.5h8M12 8V5.5c0-1.5 1.5-1.5 2.5-2.5"/></svg>
+      <span class="mode__cn" lang="zh">爆竹</span><span class="mode__en">Firecracker</span>
+    </button>
+    <button class="mode" type="button" data-mode="bomb" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="14" r="6.5"/><path d="M14.5 8.5l2-2M16.5 6.5c1-1.5 2.5-1.5 3.5-2.5"/></svg>
+      <span class="mode__cn" lang="zh">炸弹</span><span class="mode__en">Bomb</span>
+    </button>
+    <button class="mode" type="button" data-mode="snow" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M12 6l-2-2M12 6l2-2M12 18l-2 2M12 18l2 2"/></svg>
+      <span class="mode__cn" lang="zh">雪</span><span class="mode__en">Snow</span>
+    </button>
+  </nav>
+</div>
+
+<script src="engine.js" defer></script>
+<script>
+  // Offline use: the service worker keeps a copy of the app after the first visit.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () { /* still works online */ });
+    });
+  }
+
+  // A one-time note on how to put the app on the home screen.
+  (function () {
+    var box = document.querySelector("[data-install]");
+    if (!box) return;
+    var text = box.querySelector("[data-install-text]");
+    var go = box.querySelector("[data-install-go]");
+    var close = box.querySelector("[data-install-close]");
+    var seen = false;
+    try { seen = localStorage.getItem("bengbeng-install") === "1"; } catch (e) { /* private mode */ }
+    var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+    function dismiss() {
+      box.hidden = true;
+      try { localStorage.setItem("bengbeng-install", "1"); } catch (e) { /* private mode */ }
+    }
+    close.addEventListener("click", dismiss);
+    if (seen || standalone) return;
+    // the note steps aside as soon as play starts, and stops appearing after three visits
+    var shown = 0;
+    try { shown = parseInt(localStorage.getItem("bengbeng-install-shown") || "0", 10) || 0; } catch (e) { /* private mode */ }
+    if (shown >= 3) return;
+    try { localStorage.setItem("bengbeng-install-shown", String(shown + 1)); } catch (e) { /* private mode */ }
+    document.querySelector("[data-bengbeng-canvas]").addEventListener("pointerdown", function () { box.hidden = true; }, { once: true });
+
+    var ua = window.navigator.userAgent;
+    var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (ios) {
+      text.textContent = "添加到主屏幕：点“分享”，再选“添加到主屏幕”。 To keep this as an app, tap Share, then Add to Home Screen.";
+      box.hidden = false;
+      return;
+    }
+    window.addEventListener("beforeinstallprompt", function (event) {
+      event.preventDefault();
+      text.textContent = "安装为应用，离线也能玩。 Install this as an app; it also works offline.";
+      go.hidden = false;
+      box.hidden = false;
+      go.addEventListener("click", function () {
+        event.prompt();
+        dismiss();
+      }, { once: true });
+    });
+  })();
+</script>
+</body>
+</html>
