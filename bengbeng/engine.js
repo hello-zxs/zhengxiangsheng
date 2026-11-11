@@ -116,6 +116,7 @@
   const bombs = [];
   const papers = [];
   const flakes = [];
+  const texts = [];
   const touches = new Map();
 
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -350,6 +351,10 @@
     c.fillStyle = g;
     c.fillRect(0, 0, 64, 64);
     return puff;
+  }
+
+  function sayAt(x, y, str, size, color) {
+    texts.push({ x: clamp(x, 30, W - 30), y: clamp(y, 30, H - 20), str, size, color, t: 0, life: 0.95 });
   }
 
   /* ------------------------------------------------------------ fireworks */
@@ -1111,6 +1116,7 @@
         addSmoke(makeSmoke(b.x + Math.cos(a) * 26, b.y - 96 + Math.sin(a) * 12, Math.cos(a) * 0.9, rnd(-0.9, -0.3), rnd(2.4, 3.6), rnd(26, 44)));
       }
     }
+    sayAt(b.x, b.y - R * 0.5, b.big ? "轰隆" : "轰", b.big ? 46 : 34, "#ffe9a8");
     whiteout = Math.max(whiteout, b.big ? 0.46 : 0.24);
     shake(b.big ? 17 : 9, b.big ? 0.6 : 0.42);
     sfx("boom", b.big ? 1.3 : 1);
@@ -2172,7 +2178,7 @@
     return particles.length || smoke.length || flashes.length || shocks.length || fireballs.length ||
       rockets.length || strings.length || strays.length || cracks.length || kickers.length || bombs.length ||
       flakes.length ||
-      touches.size || whiteout > 0.01 || shakeLeft > 0 ||
+      texts.length || touches.size || whiteout > 0.01 || shakeLeft > 0 ||
       papers.some((p) => !p.settled || p.rest > p.keep - 1.2) || mode === "snow" ||
       mode === "peach" || tree.show > 0 || petals.some((p) => !p.settled || p.rest > p.keep - 1.5);
   }
@@ -2540,6 +2546,21 @@
       }
     }
 
+    // the sound of it, written out
+    for (let i = texts.length - 1; i >= 0; i--) {
+      const t = texts[i];
+      t.t += dt;
+      const k = t.t / t.life;
+      if (k >= 1) { texts.splice(i, 1); continue; }
+      const grow = 0.6 + 0.5 * Math.min(1, k * 7);
+      ctx.globalAlpha = Math.min(1, (1 - k) * 2.2);
+      ctx.fillStyle = t.color;
+      ctx.font = "800 " + Math.round(t.size * grow) + 'px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif';
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(t.str, t.x, t.y - 26 * k);
+    }
+    ctx.textBaseline = "alphabetic";
     ctx.globalAlpha = 1;
     ctx.restore();
 
@@ -2580,7 +2601,7 @@
   }
 
   function clearAll() {
-    for (const list of [particles, smoke, flashes, shocks, fireballs, rockets, strings, strays, cracks, kickers, bombs, papers, flakes, petals]) list.length = 0;
+    for (const list of [particles, smoke, flashes, shocks, fireballs, rockets, strings, strays, cracks, kickers, bombs, papers, flakes, petals, texts]) list.length = 0;
     for (const b of tree.blossoms) for (const p of b.petals) { p.on = true; p.grow = 1; }
     touches.clear();
     pile.fill(0);
