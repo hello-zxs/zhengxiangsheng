@@ -54,7 +54,7 @@
 <link rel="preload" href="assets/fonts/newsreader-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="assets/record.css?v=20261111a">
+<link rel="stylesheet" href="assets/record.css?v=20261111d">
 <link rel="stylesheet" href="assets/matrix/matrix.css">
 <script>
   (function () {
@@ -311,13 +311,13 @@
     <div class="section-head reveal">
       <p class="index">06</p>
       <h2>蹦蹦<span class="zh" lang="en">BENG BENG</span></h2>
-      <p class="section-note">A small pyrotechnic playground. Choose a toy, then tap, hold or drag on the stage: firecrackers can be laid along a line, bombs can be thrown, and every tap of snow is a different crystal. Silent unless you ask.</p>
+      <p class="section-note">A small pyrotechnic playground. Choose a toy, then tap, hold or drag on the stage: firecrackers can be laid along a line, bombs can be thrown, every tap of snow is a different crystal, and a peach branch in ink lets its petals fall when touched. Silent unless you ask.</p>
       <p class="section-note"><a class="bengbeng__app" href="bengbeng/">Open it as a full-screen app ↗</a></p>
     </div>
     <div class="bengbeng__body reveal">
       <div class="bengbeng__stage" data-bengbeng-stage>
         <canvas class="bengbeng__canvas" data-bengbeng-canvas tabindex="0"
-          aria-label="Play area. Choose fireworks, firecrackers, bombs or snow, then tap, hold or drag here, or press Enter to set one off."></canvas>
+          aria-label="Play area. Choose fireworks, firecrackers, bombs, snow or peach blossom, then tap, hold or drag here, or press Enter to set one off."></canvas>
         <div class="bengbeng__badge" aria-hidden="true" data-bengbeng-badge>LIVE · NO SOUND</div>
         <div class="bengbeng__hint" aria-hidden="true">TAP · HOLD · DRAG</div>
         <button class="bengbeng__motion" type="button" data-motion hidden>Reduced motion is on · Play anyway</button>
@@ -335,6 +335,9 @@
           </button>
           <button class="bengbeng__mode" type="button" data-mode="snow" aria-pressed="false">
             <span class="bengbeng__mode-cn">雪</span><span class="bengbeng__mode-en">Snow</span>
+          </button>
+          <button class="bengbeng__mode" type="button" data-mode="peach" aria-pressed="false">
+            <span class="bengbeng__mode-cn">桃花</span><span class="bengbeng__mode-en">Peach</span>
           </button>
         </div>
         <div class="bengbeng__actions">
@@ -368,6 +371,6 @@
 <script src="assets/app.js" defer></script>
 <script src="assets/matrix/matrix.js" defer></script>
 <script src="assets/fireworks.js" defer></script>
-<script src="bengbeng/engine.js?v=20261111c" defer></script>
+<script src="bengbeng/engine.js?v=20261111d" defer></script>
 </body>
 </html>

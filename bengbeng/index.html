@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>蹦蹦 BENG BENG — fireworks, firecrackers, bombs and snow</title>
-<meta name="description" content="A small pyrotechnic playground: fireworks, strings of firecrackers, bouncing bombs and eight kinds of snow crystal. Tap, hold, drag and flick. Works offline; add it to your home screen.">
+<title>蹦蹦 BENG BENG — fireworks, firecrackers, bombs, snow and peach blossom</title>
+<meta name="description" content="A small pyrotechnic playground: fireworks, strings of firecrackers, bouncing bombs, eight kinds of snow crystal, and a peach branch in ink that lets its petals fall. Tap, hold, drag and flick. Works offline; add it to your home screen.">
 <meta name="author" content="Zheng Xiangsheng">
 <meta name="theme-color" content="#05060a">
 <meta name="color-scheme" content="dark">
@@ -15,7 +15,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta property="og:type" content="website">
 <meta property="og:title" content="蹦蹦 BENG BENG">
-<meta property="og:description" content="Fireworks, firecrackers, bombs and snow. Tap, hold, drag and flick.">
+<meta property="og:description" content="Fireworks, firecrackers, bombs, snow and peach blossom. Tap, hold, drag and flick.">
 <meta property="og:url" content="https://zhengxiangsheng.com/bengbeng/">
 <meta property="og:image" content="https://zhengxiangsheng.com/bengbeng/icons/icon-512.png">
 <link rel="canonical" href="https://zhengxiangsheng.com/bengbeng/">
@@ -31,20 +31,20 @@
     <div class="bar__tools">
       <button class="tool" type="button" data-sound aria-pressed="false"><span lang="zh">声音</span> <span class="tool__en">Sound</span> <b data-sound-label>off</b></button>
       <button class="tool" type="button" data-clear><span lang="zh">清空</span> <span class="tool__en">Clear</span></button>
-      <a class="tool" href="/" aria-label="Back to zhengxiangsheng.com"><span lang="zh">主页</span> <span class="tool__en">Home</span></a>
+      <a class="tool" href="/" aria-label="主页 Home — back to zhengxiangsheng.com"><span lang="zh">主页</span> <span class="tool__en">Home</span></a>
     </div>
   </header>
 
   <main class="stage" data-bengbeng-stage="full">
     <canvas class="stage__canvas" data-bengbeng-canvas tabindex="0"
-      aria-label="Play area. Choose fireworks, firecrackers, bombs or snow below, then tap, hold or drag here. Press Enter to set one off in the middle."></canvas>
+      aria-label="Play area. Choose fireworks, firecrackers, bombs, snow or peach blossom below, then tap, hold or drag here. Press Enter to set one off in the middle."></canvas>
     <p class="stage__status" data-bengbeng-status aria-live="polite">烟花 · Fireworks</p>
     <button class="stage__motion" type="button" data-motion hidden>Reduced motion is on · <span lang="zh">仍要播放</span> Play anyway</button>
     <aside class="install" data-install hidden>
       <p data-install-text></p>
       <div class="install__actions">
         <button class="tool" type="button" data-install-go hidden>Install</button>
-        <button class="tool" type="button" data-install-close aria-label="Dismiss">OK</button>
+        <button class="tool" type="button" data-install-close>OK</button>
       </div>
     </aside>
   </main>
@@ -65,6 +65,10 @@
     <button class="mode" type="button" data-mode="snow" aria-pressed="false">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9M12 6l-2-2M12 6l2-2M12 18l-2 2M12 18l2 2"/></svg>
       <span class="mode__cn" lang="zh">雪</span><span class="mode__en">Snow</span>
+    </button>
+    <button class="mode" type="button" data-mode="peach" aria-pressed="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 11c-2.1-2.2-2.1-5 0-7.2 2.1 2.2 2.1 5 0 7.2z"/><path d="M12 11c-2.1-2.2-2.1-5 0-7.2 2.1 2.2 2.1 5 0 7.2z" transform="rotate(72 12 12)"/><path d="M12 11c-2.1-2.2-2.1-5 0-7.2 2.1 2.2 2.1 5 0 7.2z" transform="rotate(144 12 12)"/><path d="M12 11c-2.1-2.2-2.1-5 0-7.2 2.1 2.2 2.1 5 0 7.2z" transform="rotate(216 12 12)"/><path d="M12 11c-2.1-2.2-2.1-5 0-7.2 2.1 2.2 2.1 5 0 7.2z" transform="rotate(288 12 12)"/></svg>
+      <span class="mode__cn" lang="zh">桃花</span><span class="mode__en">Peach</span>
     </button>
   </nav>
 </div>

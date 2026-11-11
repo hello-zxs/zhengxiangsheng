@@ -138,6 +138,30 @@ body {
   background-size: auto, 44px 44px, 44px 44px, auto;
 }
 
+/* 桃花: a sheet of old paper slides in behind the canvas, with a pale moon and a little mist */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  background:
+    radial-gradient(circle 33px at 78% 19%, rgba(255, 253, 244, 0.95) 0 93%, rgba(255, 253, 244, 0) 100%),
+    radial-gradient(circle 74px at 78% 19%, rgba(255, 250, 232, 0.5), rgba(255, 250, 232, 0) 100%),
+    radial-gradient(ellipse at 34% 112%, rgba(112, 126, 122, 0.24), transparent 56%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.28 0 0 0 0 0.16 0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 50% 42%, #f4ebd7 0%, #ebe0c7 62%, #dccdab 100%);
+}
+
+.stage[data-toy="peach"]::before {
+  opacity: 1;
+}
+
+.stage[data-toy="peach"] .stage__status {
+  color: rgba(52, 40, 30, 0.74);
+}
+
 .stage__canvas {
   position: absolute;
   inset: 0;
@@ -228,8 +252,8 @@ body {
 /* ---------- the four toys ---------- */
 .modes {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
   padding: 10px calc(env(safe-area-inset-right, 0px) + 10px) calc(env(safe-area-inset-bottom, 0px) + 10px)
     calc(env(safe-area-inset-left, 0px) + 10px);
 }
@@ -316,6 +340,12 @@ body {
   color: #0c1a2c;
 }
 
+.mode.is-active[data-mode="peach"] {
+  border-color: #f6c3cf;
+  background: #f6c3cf;
+  color: #3b1622;
+}
+
 .mode:focus-visible,
 .tool:focus-visible,
 .stage__motion:focus-visible {
@@ -344,6 +374,16 @@ body {
   .tool__en {
     display: none;
   }
+  .mode__en {               /* five toys across: the small labels tighten to fit */
+    font-size: 8px;
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (max-width: 372px) {
+  .mode__en {
+    display: none;
+  }
 }
 
 @media (max-width: 350px) {
@@ -356,7 +396,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mode {
+  .mode,
+  .stage::before {
     transition: none;
   }
 }
