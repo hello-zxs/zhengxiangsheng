@@ -50,7 +50,7 @@
     snow: "雪 · Snow"
   };
   const HINTS = {
-    fireworks: "tap for a shell, hold for a grand one.",
+    fireworks: "click for a shell, hold for a grand one.",
     firecracker: "tap to hang a long string, drag to lay one, hold for a double-banger.",
     bomb: "tap to drop, hold for a big one, flick to throw. They set each other off.",
     snow: "tap for a flurry, hold to grow a crystal, drag to scatter."
@@ -112,7 +112,6 @@
   const bombs = [];
   const papers = [];
   const flakes = [];
-  const texts = [];
   const touches = new Map();
 
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -263,9 +262,6 @@
       noiseBurst(t, 0.9 * v, 0.9, "lowpass", 420);
       noiseBurst(t, 0.18, 0.5, "highpass", 1400);
       tone(t, 0.7 * v, 0.9, 95, 28);
-    } else if (kind === "burst") {
-      noiseBurst(t, 0.4, 0.3 * v, "bandpass", rnd(900, 1500), 0.6);
-      tone(t, 0.25, 0.18 * v, 120, 50);
     } else if (kind === "thud") {
       tone(t, 0.09, 0.22 * v, 110, 55);
     } else if (kind === "tink") {
@@ -313,6 +309,7 @@
       gravity, drag,
       kind: kind || "spark",
       flicker: Math.random() < 0.14,
+      asBefore,
       split: false,
       didSplit: false
     };
@@ -337,11 +334,10 @@
     return puff;
   }
 
-  function sayAt(x, y, str, size, color) {
-    texts.push({ x: clamp(x, 30, W - 30), y: clamp(y, 30, H - 20), str, size, color, t: 0, life: 0.95 });
-  }
-
   /* ------------------------------------------------------------ fireworks */
+  // This toy is the original one, unchanged: the same shells, the same motion, no sound.
+  let asBefore = false;
+
   function heartPoint(t) {
     const x = 16 * Math.pow(Math.sin(t), 3);
     const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
@@ -354,22 +350,34 @@
   }
 
   function launchShell(x, y, scale) {
+    if (reduced) return;
+    const targetX = clamp(x, 26, W - 26);
+    const targetY = clamp(y, 34, H - 44);
     rockets.push({
-      x0: clamp(clamp(x, 26, W - 26) + rnd(-22, 22), 14, W - 14),
+      x0: clamp(targetX + rnd(-22, 22), 14, W - 14),
       y0: H + 6,
-      x1: clamp(x, 26, W - 26),
-      y1: clamp(y, 34, H - 44),
+      x1: targetX,
+      y1: targetY,
       t: 0,
       fly: rnd(0.32, 0.44),
       type: pick(FIREWORK_TYPES),
-      scale: scale || 1
+      scale: scale || 1,
+      trailClock: 0
     });
     startLoop();
   }
 
   function burst(x, y, scale, type) {
+    if (reduced) return;
     scale = scale || 1;
     type = type || pick(FIREWORK_TYPES);
+    if (type === "double") {
+      burst(x, y, scale * 0.72, "ring");
+      burst(x, y, scale * 1.12, "ring");
+      return;
+    }
+
+    asBefore = true;
     const colors = pick(FIREWORK_SETS);
     const shapeColors = type === "heart"
       ? ["#ff2d55", "#ff7aa8", "#ffd60a", "#ffffff"]
@@ -385,6 +393,7 @@
 
     if (type === "chrysanthemum") { n = 330; speed = 5.8; life = 3.6; gravity = 2.0; size = 1.6; }
     if (type === "willow") { n = 240; speed = 4.8; life = 4.2; gravity = 1.0; drag = 0.995; size = 1.4; }
+    if (type === "ring") { n = 260; speed = 5.0; life = 3.2; gravity = 1.5; size = 1.6; }
     if (type === "crossette") { n = 150; speed = 5.4; life = 3.2; gravity = 2.8; size = 1.7; }
     if (type === "palm") { n = 100; speed = 5.2; life = 3.8; gravity = 1.2; size = 2.6; }
     if (type === "heart") { n = 250; life = 4.2; gravity = 0.8; drag = 0.996; size = 1.9; }
@@ -394,15 +403,19 @@
       let vx;
       let vy;
       if (type === "heart") {
-        const [hx, hy] = heartPoint((i / n) * TAU + rnd(-0.012, 0.012));
+        const [hx, hy] = heartPoint((i / n) * Math.PI * 2 + rnd(-0.012, 0.012));
         vx = hx * 4.1 * scale;
         vy = hy * 4.1 * scale;
       } else if (type === "clover") {
-        const [cx, cy] = cloverPoint((i / n) * TAU + rnd(-0.012, 0.012));
+        const [cx, cy] = cloverPoint((i / n) * Math.PI * 2 + rnd(-0.012, 0.012));
         vx = cx * 4.1 * scale;
         vy = cy * 4.1 * scale;
+      } else if (type === "ring") {
+        const a = (i / n) * Math.PI * 2;
+        vx = Math.cos(a) * speed * scale;
+        vy = Math.sin(a) * speed * scale * 0.64;
       } else {
-        const a = (i / n) * TAU + rnd(-0.018, 0.018);
+        const a = (i / n) * Math.PI * 2 + rnd(-0.018, 0.018);
         const s = speed * scale * Math.sqrt(rnd(0.1, 1));
         vx = Math.cos(a) * s;
         vy = Math.sin(a) * s;
@@ -417,17 +430,19 @@
 
     flash(x, y, 1.55 * scale, shapeColors[0]);
     shocks.push({ x, y, t: 0, life: 0.65, max: 96 * scale, color: shapeColors[0] });
+
     for (let i = 0; i < 24; i++) {
-      const a = rnd(0, TAU);
+      const a = rnd(0, Math.PI * 2);
       const s = rnd(0.5, 2.2);
       addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
         rnd(0.3, 0.8), pick(["#ffffff", "#ffd60a", shapeColors[1]]),
         rnd(0.6, 1.2), 28, 0.98, "spark"));
     }
-    sfx("burst", clamp(scale, 0.4, 1.2));
+    asBefore = false;
   }
 
   function launchGrand(x, y) {
+    if (reduced) return;
     rockets.push({
       x0: clamp(x + rnd(-18, 18), 18, W - 18),
       y0: H + 8,
@@ -437,55 +452,109 @@
       fly: 0.62,
       type: "grand",
       scale: 1,
-      grand: true
+      grand: true,
+      trailClock: 0
     });
     startLoop();
   }
 
   function grandBurst(x, y) {
+    if (reduced) return;
+    asBefore = true;
     const gold = ["#ffd700", "#ffe9a8", "#fffbe6", "#ffffff"];
     const jewel = ["#4169e1", "#8b1e3f", "#1f7a5a", "#bf9b30", "#ffd700"];
+
     flash(x, y, 3.0, "#ffd700");
     fireballs.push({ x, y, t: 0, life: 2.2, scale: 1.35 });
     shocks.push({ x, y, t: 0, life: 1.1, max: 280, color: "#ffd700" });
     shocks.push({ x, y, t: 0.08, life: 0.95, max: 215, color: "#ffffff" });
-    const ring = (n, speed, lifeA, lifeB, colors, sizeA, sizeB, gravity, drag, squash) => {
-      for (let i = 0; i < n; i++) {
-        const a = (i / n) * TAU + rnd(-0.02, 0.02);
-        const s = squash ? speed : speed * Math.sqrt(rnd(0.12, 1));
-        addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s * (squash || 1),
-          rnd(lifeA, lifeB), pick(colors), rnd(sizeA, sizeB), gravity, drag, "spark"));
-      }
-    };
-    ring(420, 6.2, 3.6, 4.4, gold, 1.8, 2.8, 1.2, 0.994);
-    ring(120, 3.2, 3.8, 4.6, ["#ffd700", "#e6b84a", "#ffe9a8"], 1.2, 2.0, 0.7, 0.996);
-    ring(240, 4.0, 3.2, 3.8, jewel, 1.3, 2.2, 1.5, 0.994);
-    ring(180, 5.8, 3.2, 3.8, ["#fffbe6", "#ffd700", "#ffffff"], 1.4, 2.2, 1.0, 0.995, 0.66);
+
+    for (let i = 0; i < 420; i++) {
+      const a = (i / 420) * Math.PI * 2 + rnd(-0.01, 0.01);
+      const s = 6.2 * Math.sqrt(rnd(0.12, 1));
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(3.6, 4.4), pick(gold), rnd(1.8, 2.8), 1.2, 0.994, "spark"));
+    }
+
+    for (let i = 0; i < 120; i++) {
+      const a = (i / 120) * Math.PI * 2 + rnd(-0.02, 0.02);
+      const s = 3.2 * Math.sqrt(rnd(0.1, 1));
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(3.8, 4.6), pick(["#ffd700", "#e6b84a", "#ffe9a8"]),
+        rnd(1.2, 2.0), 0.7, 0.996, "spark"));
+    }
+
+    for (let i = 0; i < 240; i++) {
+      const a = (i / 240) * Math.PI * 2 + rnd(-0.02, 0.02);
+      const s = 4.0 * Math.sqrt(rnd(0.15, 1));
+      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
+        rnd(3.2, 3.8), pick(jewel), rnd(1.3, 2.2), 1.5, 0.994, "spark"));
+    }
+
+    for (let i = 0; i < 180; i++) {
+      const a = (i / 180) * Math.PI * 2;
+      addParticle(makeParticle(x, y,
+        Math.cos(a) * 5.8, Math.sin(a) * 5.8 * 0.66,
+        rnd(3.2, 3.8), pick(["#fffbe6", "#ffd700", "#ffffff"]),
+        rnd(1.4, 2.2), 1.0, 0.995, "spark"));
+    }
+
     for (let i = 0; i < 140; i++) {
-      const a = rnd(0, TAU);
+      const a = rnd(0, Math.PI * 2);
       const s = rnd(1.2, 5.2);
       addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
         rnd(1.4, 2.4), pick(["#ffffff", "#ffe9a8", "#ffd700"]),
         rnd(0.6, 1.2), 2.0, 0.99, "spark"));
     }
-    shake(5, 0.35);
-    sfx("boom", 0.8);
+    asBefore = false;
   }
 
   function splitParticle(p) {
+    asBefore = !!p.asBefore;
     for (let i = 0; i < 4; i++) {
-      const a = rnd(0, TAU);
+      const a = rnd(0, Math.PI * 2);
       const s = rnd(0.5, 2.6);
       addParticle(makeParticle(p.x, p.y, Math.cos(a) * s, Math.sin(a) * s,
         rnd(0.3, 0.7), i === 0 ? "#ffffff" : p.color,
         rnd(0.7, 1.5), 28, 0.97, "spark"));
     }
+    asBefore = false;
   }
 
   function fireworksAt(x, y) {
+    x = clamp(x, 18, W - 18);
+    y = clamp(y, 18, H - 18);
     launchShell(x, y, 1.1);
-    window.setTimeout(() => launchShell(x + rnd(-120, 120), y + rnd(-58, 52), rnd(0.55, 0.75)), rnd(160, 260));
-    window.setTimeout(() => launchShell(x + rnd(-150, 150), y + rnd(-70, 62), rnd(0.42, 0.58)), rnd(320, 410));
+    window.setTimeout(() => {
+      launchShell(x + rnd(-120, 120), y + rnd(-58, 52), rnd(0.55, 0.75));
+    }, rnd(160, 260));
+    window.setTimeout(() => {
+      launchShell(x + rnd(-150, 150), y + rnd(-70, 62), rnd(0.42, 0.58));
+    }, rnd(320, 410));
+  }
+
+  function drawCharge(g) {
+    if (g.mode !== "fireworks" || g.moved || g.fired) return;
+    const p = Math.min(1, g.t / 0.72);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = 0.55;
+    ctx.strokeStyle = "#ffd700";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(g.sx, g.sy, 24, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 0.95;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(g.sx, g.sy, 24, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p);
+    ctx.stroke();
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = "#ffd700";
+    ctx.font = '9px "Inter", system-ui, sans-serif';
+    ctx.textAlign = "center";
+    ctx.fillText("HOLD", g.sx, g.sy + 42);
+    ctx.globalAlpha = 1;
   }
 
   /* ------------------------------------------------- paper, the red litter */
@@ -1024,7 +1093,6 @@
         addSmoke(makeSmoke(b.x + Math.cos(a) * 26, b.y - 96 + Math.sin(a) * 12, Math.cos(a) * 0.9, rnd(-0.9, -0.3), rnd(2.4, 3.6), rnd(26, 44)));
       }
     }
-    sayAt(b.x, b.y - R * 0.5, b.big ? "轰隆" : "轰", b.big ? 46 : 34, "#ffe9a8");
     whiteout = Math.max(whiteout, b.big ? 0.46 : 0.24);
     shake(b.big ? 17 : 9, b.big ? 0.6 : 0.42);
     sfx("boom", b.big ? 1.3 : 1);
@@ -1411,9 +1479,7 @@
   }
 
   function drawGesture(g) {
-    if (g.mode === "fireworks" && !g.moved && !g.fired && g.t > 0.12) {
-      drawRing(g.sx, g.sy, g.t / 0.72, "HOLD");
-    } else if (g.mode === "firecracker") {
+    if (g.mode === "firecracker") {
       if (g.moved && g.path.length > 1) {
         ctx.globalCompositeOperation = "source-over";
         ctx.globalAlpha = 0.7;
@@ -1459,7 +1525,7 @@
     return particles.length || smoke.length || flashes.length || shocks.length || fireballs.length ||
       rockets.length || strings.length || strays.length || cracks.length || kickers.length || bombs.length ||
       flakes.length ||
-      texts.length || touches.size || whiteout > 0.01 || shakeLeft > 0 ||
+      touches.size || whiteout > 0.01 || shakeLeft > 0 ||
       papers.some((p) => !p.settled || p.rest > p.keep - 1.2) || mode === "snow";
   }
 
@@ -1738,8 +1804,9 @@
       p.vx *= Math.pow(p.drag, f);
       p.vy *= Math.pow(p.drag, f);
       p.vy += p.gravity * dt;
-      p.x += p.vx * f;
-      p.y += p.vy * f;
+      const step = p.asBefore ? (dt > 0 ? 1 : 0) : f;   // fireworks: one step a frame, as before
+      p.x += p.vx * step;
+      p.y += p.vy * step;
       if (p.split && !p.didSplit && p.life < p.maxLife * 0.6) {
         p.didSplit = true;
         splitParticle(p);
@@ -1782,6 +1849,8 @@
       }
     }
 
+    touches.forEach(drawCharge);
+
     // snowflakes, in front of everything else
     ctx.globalCompositeOperation = "source-over";
     const wind = Math.sin(clock * 0.21) * 14;
@@ -1818,21 +1887,6 @@
       }
     }
 
-    // the sound of it, written out
-    for (let i = texts.length - 1; i >= 0; i--) {
-      const t = texts[i];
-      t.t += dt;
-      const k = t.t / t.life;
-      if (k >= 1) { texts.splice(i, 1); continue; }
-      const grow = 0.6 + 0.5 * Math.min(1, k * 7);
-      ctx.globalAlpha = Math.min(1, (1 - k) * 2.2);
-      ctx.fillStyle = t.color;
-      ctx.font = "800 " + Math.round(t.size * grow) + 'px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif';
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(t.str, t.x, t.y - 26 * k);
-    }
-    ctx.textBaseline = "alphabetic";
     ctx.globalAlpha = 1;
     ctx.restore();
 
@@ -1869,7 +1923,7 @@
   }
 
   function clearAll() {
-    for (const list of [particles, smoke, flashes, shocks, fireballs, rockets, strings, strays, cracks, kickers, bombs, papers, flakes, texts]) list.length = 0;
+    for (const list of [particles, smoke, flashes, shocks, fireballs, rockets, strings, strays, cracks, kickers, bombs, papers, flakes]) list.length = 0;
     touches.clear();
     pile.fill(0);
     pileTop = 0;
@@ -1922,7 +1976,7 @@
     g.y = y;
     g.samples.push([performance.now(), x, y]);
     while (g.samples.length > 2 && g.samples[g.samples.length - 1][0] - g.samples[0][0] > 90) g.samples.shift();
-    if (!g.moved && Math.hypot(x - g.sx, y - g.sy) > 12) g.moved = true;
+    if (!g.moved && Math.hypot(x - g.sx, y - g.sy) > (g.mode === "fireworks" ? 14 : 12)) g.moved = true;
     if (!g.moved) return;
     if (g.mode === "firecracker" && g.length < 1300) {
       const lastPoint = g.path[g.path.length - 1];
@@ -1974,7 +2028,7 @@
     }
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      ignite(W * 0.5, H * (mode === "bomb" ? 0.18 : 0.36));
+      ignite(W * 0.5, H * (mode === "bomb" ? 0.18 : mode === "fireworks" ? 0.42 : 0.36));
     }
   });
 

@@ -3,7 +3,7 @@
    Network first: when online, every file comes fresh from the site and the copy
    in the cache is refreshed.  When offline, the cached copy is served instead.
    Change CACHE when files are added or renamed; old caches are removed. */
-const CACHE = "bengbeng-v2";
+const CACHE = "bengbeng-v3";
 const FILES = [
   "./",
   "./index.html",
