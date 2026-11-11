@@ -202,6 +202,11 @@ body {
   background: rgba(10, 12, 18, 0.92);
   font-size: 13px;
   line-height: 1.45;
+  pointer-events: none;     /* a touch on the note goes through to the stage, and starts the game */
+}
+
+.install__actions {
+  pointer-events: auto;
 }
 
 .install[hidden],

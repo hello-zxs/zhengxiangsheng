@@ -6,8 +6,8 @@
 
    Gestures (mouse, pen or any number of fingers):
      fireworks    tap = three shells          hold = one grand shell
-     firecracker  tap = a hanging string      drag = lay a string along the path
-                  hold = a double-banger (二踢脚)
+     firecracker  tap = 大地红, a full-length braid on a pole, lit at the bottom
+                  drag = lay a braid along the path   hold = a double-banger (二踢脚)
      bomb         tap = drop                  hold = a bigger bomb
                   flick = throw; bombs bounce, roll and set each other off
      snow         tap = a flurry of one crystal type (it changes every tap)
@@ -51,7 +51,7 @@
   };
   const HINTS = {
     fireworks: "tap for a shell, hold for a grand one.",
-    firecracker: "tap to hang a string, drag to lay one, hold for a double-banger.",
+    firecracker: "tap to hang a long string, drag to lay one, hold for a double-banger.",
     bomb: "tap to drop, hold for a big one, flick to throw. They set each other off.",
     snow: "tap for a flurry, hold to grow a crystal, drag to scatter."
   };
@@ -65,10 +65,17 @@
     { id: "capped", cn: "冠状星", en: "capped star" },
     { id: "triangle", cn: "三角晶", en: "triangular crystal" }
   ];
-  const PAPER_COLORS = ["#c81e1e", "#e03a2f", "#b51f1a", "#f2c14e", "#f6e7c8", "#d9322b"];
+  // shreds of the wrapper: red outside, with a little of the pale inner paper
+  const PAPER_COLORS = ["#c81e1e", "#e03a2f", "#b51f1a", "#d9322b", "#a81712", "#cf2a22", "#e0574b", "#ead9c0"];
+  const CRACK_SPARKS = ["#fff3c4", "#ffd60a", "#ffb340", "#ffffff"];
+  const TUBE_H = 18;                  // one cracker, px
+  const TUBE_W = 6.5;
+  const BIG_H = 26;                   // the big ones
+  const BIG_W = 9.5;
+  const ROW = 8.5;                    // spacing of the pairs along the braid
   const MAX_PARTICLES = 3600;
   const MAX_SMOKE = 420;
-  const MAX_PAPER = 520;
+  const MAX_PAPER = 1100;
   const MAX_FLAKES = 300;
   const MAX_BOMBS = 14;
   const COL = 4;                      // width of one snow-pile column, px
@@ -99,6 +106,8 @@
   const fireballs = [];
   const rockets = [];
   const strings = [];
+  const strays = [];
+  const cracks = [];
   const kickers = [];
   const bombs = [];
   const papers = [];
@@ -172,7 +181,32 @@
       audio.ctx = new AC();
       audio.master = audio.ctx.createGain();
       audio.master.gain.value = 0.55;
-      audio.master.connect(audio.ctx.destination);
+      // a limiter, so that a whole string going off does not clip ...
+      let sink = audio.ctx.destination;
+      if (audio.ctx.createDynamicsCompressor) {
+        const limit = audio.ctx.createDynamicsCompressor();
+        limit.threshold.value = -14;
+        limit.knee.value = 10;
+        limit.ratio.value = 8;
+        limit.attack.value = 0.002;
+        limit.release.value = 0.12;
+        limit.connect(sink);
+        sink = limit;
+      }
+      audio.master.connect(sink);
+      // ... and one slap of echo, as off the wall across the street
+      const delay = audio.ctx.createDelay(0.5);
+      delay.delayTime.value = 0.14;
+      const damp = audio.ctx.createBiquadFilter();
+      damp.type = "lowpass";
+      damp.frequency.value = 1500;
+      const wet = audio.ctx.createGain();
+      wet.gain.value = 0.26;
+      audio.master.connect(delay);
+      delay.connect(damp);
+      damp.connect(wet);
+      wet.connect(sink);
+      wet.connect(delay);
       const len = audio.ctx.sampleRate;
       const buf = audio.ctx.createBuffer(1, len, len);
       const data = buf.getChannelData(0);
@@ -215,14 +249,16 @@
     if (!audio.on || !audio.ctx || audio.ctx.state !== "running") return;
     const t = audio.ctx.currentTime;
     const v = level === undefined ? 1 : level;
-    if (kind === "pop") {
-      if (t - audio.lastPop < 0.022) return;       // a long string would otherwise saturate
+    if (kind === "crack") {
+      if (t - audio.lastPop < 0.016) return;       // a long string would otherwise saturate
       audio.lastPop = t;
-      noiseBurst(t, 0.07, 0.5 * v, "highpass", rnd(900, 1500));
-      tone(t, 0.05, 0.3 * v, rnd(170, 230), 60);
+      noiseBurst(t, rnd(0.03, 0.05), 0.9 * v, "highpass", rnd(1400, 3200));   // the snap
+      noiseBurst(t, 0.09, 0.4 * v, "bandpass", rnd(500, 900), 0.8);           // the paper tube
+      tone(t, 0.045, 0.35 * v, rnd(190, 260), 70);
     } else if (kind === "bang") {
-      noiseBurst(t, 0.22, 0.75 * v, "lowpass", 2600);
-      tone(t, 0.2, 0.5 * v, 150, 45);
+      noiseBurst(t, 0.05, 0.9 * v, "highpass", 1200);
+      noiseBurst(t, 0.3, 0.8 * v, "lowpass", 2200);
+      tone(t, 0.26, 0.6 * v, 150, 40);
     } else if (kind === "boom") {
       noiseBurst(t, 0.9 * v, 0.9, "lowpass", 420);
       noiseBurst(t, 0.18, 0.5, "highpass", 1400);
@@ -283,7 +319,22 @@
   }
 
   function makeSmoke(x, y, vx, vy, life, size) {
-    return { x, y, vx, vy, life, maxLife: life, size, drag: 0.992, rise: rnd(2, 8) };
+    return { x, y, vx, vy, life, maxLife: life, size, drag: 0.992, rise: rnd(2, 8), a: 0.3 };
+  }
+
+  // one soft grey puff, drawn once and stamped for every puff of smoke
+  let puff = null;
+  function puffImage() {
+    if (puff) return puff;
+    puff = document.createElement("canvas");
+    puff.width = puff.height = 64;
+    const c = puff.getContext("2d");
+    const g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, "rgba(190,186,176,0.22)");
+    g.addColorStop(1, "rgba(190,186,176,0)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, 64, 64);
+    return puff;
   }
 
   function sayAt(x, y, str, size, color) {
@@ -446,7 +497,7 @@
       w: rnd(3, 6.5), h: rnd(2, 4),
       color: pick(PAPER_COLORS),
       phase: rnd(0, TAU), age: 0,
-      settled: false, rest: 0, keep: rnd(9, 15)
+      settled: false, rest: 0, keep: rnd(16, 28), lift: rnd(0, 6)
     });
   }
 
@@ -459,114 +510,240 @@
   }
 
   /* ---------------------------------------------------------- firecrackers */
-  function crackerPop(x, y, scale, loud) {
-    flash(x, y, 0.75 * scale, "#ff2d55");
-    shocks.push({ x, y, t: 0, life: 0.5, max: 72 * scale, color: "#ffd60a" });
-    const sparks = loud ? 70 : 24;
+  // One cracker going off: a ragged white-hot flash a few hundredths of a second long,
+  // a spray of short sparks, a puff of smoke that hangs about, and shreds of the wrapper.
+  // power 1 is an ordinary cracker, about 2 one of the big ones, 3 and up a double-banger.
+  function crack(x, y, power) {
+    const p = power || 1;
+    const big = p > 1.5;
+    const spikes = [];
+    for (let i = 0; i < 9; i++) spikes.push(rnd(0.7, 1.5));
+    cracks.push({ x, y, t: 0, life: 0.07 + 0.035 * p, r: 12 * p * rnd(0.85, 1.2), spikes, turn: rnd(0, TAU) });
+    const sparks = Math.round(8 * p * (big ? 1.4 : 1));
     for (let i = 0; i < sparks; i++) {
       const a = rnd(0, TAU);
-      const s = rnd(0.8, 5.2) * scale;
-      addParticle(makeParticle(x, y, Math.cos(a) * s, Math.sin(a) * s,
-        rnd(0.3, 0.85), pick(["#ff2d55", "#ffd60a", "#ffffff", "#ff9f0a"]),
-        rnd(0.8, 2.0), 44, 0.976, "spark"));
+      const v = rnd(1.5, 6.5) * Math.sqrt(p);
+      addParticle(makeParticle(x, y, Math.cos(a) * v, Math.sin(a) * v,
+        rnd(0.1, 0.2 + 0.1 * p), pick(CRACK_SPARKS), rnd(0.6, 0.9 + 0.3 * p), 40, 0.94, "spark"));
     }
-    for (let i = 0; i < (loud ? 9 : 3); i++) {
-      addSmoke(makeSmoke(x + rnd(-8, 8), y - 2, rnd(-8, 8), rnd(-16, -5), rnd(1.0, 1.8), rnd(9, 18) * scale));
+    const puffs = Math.round(1.6 * p + 0.4);
+    for (let i = 0; i < puffs; i++) {
+      const s = makeSmoke(x + rnd(-7, 7) * p, y + rnd(-7, 7) * p, rnd(-0.5, 0.5) * p, rnd(-0.5, 0.1) * p,
+        rnd(2.4, 4.2), rnd(13, 24) * (big ? 1.6 : 1));
+      s.a = 0.85;                                 // thicker than the smoke of a shell
+      s.rise = rnd(1, 3.5);
+      addSmoke(s);
     }
-    paperShower(x, y, loud ? 30 : 6, loud ? 340 : 210);
-    sfx(loud ? "bang" : "pop");
+    paperShower(x, y, Math.round(7 * Math.pow(p, 1.3)), 230 + 70 * p);
+    if (big) {
+      shake(2 * p, 0.09 * p);
+      whiteout = Math.max(whiteout, 0.02 * p);
+    } else {
+      shake(1.2, 0.07);
+    }
+    sfx(big ? "bang" : "crack", big ? p / 2.2 : rnd(0.55, 1));
   }
 
-  function addString(items, igniteIndex, rope) {
-    if (strings.length >= 6) {
+  function addString(s) {
+    if (strings.length >= 4) {                    // too many at once: the oldest goes off in one volley
       const old = strings[0];
-      old.items.forEach((it) => { it.popAt = Math.min(it.popAt, old.t + rnd(0, 0.25)); });
+      old.items.forEach((it) => { if (!it.popped) it.popAt = Math.min(it.popAt, old.t + rnd(0, 0.5)); });
     }
-    const s = { items, t: 0, rope, interval: rnd(0.052, 0.07) };
-    for (let i = 0; i < items.length; i++) {
-      items[i].popped = false;
-      items[i].popAt = 0.22 + Math.abs(i - igniteIndex) * s.interval + rnd(-0.3, 0.3) * s.interval;
-    }
+    s.t = 0;
+    s.lastPop = 0;
+    s.sparks = 0;
+    s.total = s.items.length;
     strings.push(s);
     startLoop();
   }
 
-  // tap: a string hanging from the tap point, lit at the bottom
-  function hangString(x, y) {
-    const anchorX = clamp(x, 40, W - 40);
-    const topY = clamp(y, 18, Math.max(18, H - 150));
-    const room = groundY(anchorX) - topY - 26;
-    const length = clamp(room, 70, 300);
-    const n = clamp(Math.floor(length / 14), 6, 24);
-    const items = [];
-    for (let i = 0; i < n; i++) {
-      const t = i / (n - 1);
-      items.push({
-        x: anchorX + Math.sin(t * Math.PI * 1.35) * 14,
-        y: topY + 10 + length * t,
-        rot: Math.sin(t * Math.PI) * 0.1 + (i % 2 ? 0.5 : -0.5)
-      });
+  // Where each cracker of a hanging braid is right now.  The braid bends more towards its free end.
+  function poseString(s) {
+    for (const it of s.items) {
+      const phi = s.theta * (0.3 + 0.7 * it.s / s.L);
+      const a = phi + it.lean;
+      const half = (it.big ? BIG_H : TUBE_H) / 2 + 1.5;
+      it.fx = s.ax + Math.sin(phi) * it.s;
+      it.fy = s.ay + Math.cos(phi) * it.s;
+      it.x = it.fx + Math.sin(a) * half;
+      it.y = it.fy + Math.cos(a) * half;
+      it.rot = -a;
     }
-    addString(items, n - 1, { x: anchorX, y: topY });
-    setStatus(LABELS.firecracker + " — " + n + " on the string.");
   }
 
-  // drag: crackers laid herringbone-fashion along the path, lit where the drag began
+  // tap: 大地红.  A braid as long as the stage allows, hung from a bamboo pole and lit at the
+  // bottom.  It burns upward, a big one every so often, to the bundle of big ones at the top.
+  function hangString(x, y) {
+    const ax = clamp(x, 40, W - 40);
+    const floor = groundY(ax) - 30;
+    const ay = clamp(y, 20, Math.max(20, floor - Math.min(300, H * 0.55)));
+    const L = clamp(floor - ay, 90, 640);
+    const rows = Math.max(5, Math.floor((L - 34) / ROW));
+    const step = rnd(0.085, 0.105);
+    const items = [];
+    let at = 0.45;
+    for (let r = 0; r < rows; r++) {              // row 0 is the lowest, and the first to go
+      const s = L - 6 - r * ROW;
+      const bigSide = r % 9 === 5 ? (Math.random() < 0.5 ? -1 : 1) : 0;
+      for (const side of [-1, 1]) {
+        items.push({ s, side, lean: side * rnd(0.52, 0.8), big: side === bigSide, popped: false, popAt: at + rnd(0, 0.9) * step });
+      }
+      at += step;
+    }
+    at += 0.12;
+    const head = 7;                               // 炮头: saved for last
+    for (let j = 0; j < head; j++) {
+      items.push({ s: rnd(12, 24), side: j % 2 ? 1 : -1, lean: (j - (head - 1) / 2) * 0.3, big: true, popped: false, popAt: at });
+      at += rnd(0.07, 0.11);
+    }
+    const s = { hang: true, ax, ay, L, theta: rnd(-0.03, 0.03), omega: 0, items };
+    poseString(s);
+    addString(s);
+    setStatus(LABELS.firecracker + " — 大地红，" + items.length + " 响. A string of " + items.length + ".");
+  }
+
+  // drag: the same braid rolled out along the path, lit where the drag began
   function layString(path) {
     const items = [];
+    const step = rnd(0.08, 0.095);
     let carry = 0;
-    for (let i = 1; i < path.length && items.length < 90; i++) {
+    let row = 0;
+    for (let i = 1; i < path.length && row < 150; i++) {
       const [x0, y0] = path[i - 1];
       const [x1, y1] = path[i];
       const seg = Math.hypot(x1 - x0, y1 - y0);
       if (seg < 0.01) continue;
       const a = Math.atan2(y1 - y0, x1 - x0);
-      let d = 13 - carry;
-      while (d <= seg && items.length < 90) {
-        const side = items.length % 2 ? 1 : -1;
-        const px = x0 + Math.cos(a) * d;
-        const py = y0 + Math.sin(a) * d;
-        items.push({
-          x: px + Math.cos(a + Math.PI / 2) * 4.5 * side,
-          y: py + Math.sin(a + Math.PI / 2) * 4.5 * side,
-          rot: a + Math.PI / 2 + side * 0.5,
-          fx: px, fy: py
-        });
-        d += 13;
+      let d = ROW - carry;
+      while (d <= seg && row < 150) {
+        const fx = x0 + Math.cos(a) * d;
+        const fy = y0 + Math.sin(a) * d;
+        const bigSide = row % 9 === 5 ? (Math.random() < 0.5 ? -1 : 1) : 0;
+        for (const side of [-1, 1]) {
+          const big = side === bigSide;
+          const dir = a + side * rnd(0.85, 1.15);          // herringbone, pointing along the run
+          const half = (big ? BIG_H : TUBE_H) / 2 + 1.5;
+          items.push({
+            fx, fy, side, big,
+            x: fx + Math.cos(dir) * half,
+            y: fy + Math.sin(dir) * half,
+            rot: dir - Math.PI / 2,
+            popped: false,
+            popAt: 0.45 + (row + rnd(0, 0.9)) * step
+          });
+        }
+        row++;
+        d += ROW;
       }
-      carry = seg - (d - 13);
+      carry = seg - (d - ROW);
     }
-    if (items.length < 3) return false;
-    addString(items, 0, null);
-    setStatus(LABELS.firecracker + " — " + items.length + " laid; lit at the start.");
+    if (row < 3) return false;
+    addString({ hang: false, items });
+    setStatus(LABELS.firecracker + " — " + items.length + " 响 laid out; lit at the start.");
     return true;
   }
 
-  function drawCracker(x, y, rot, alpha, hot) {
+  // Now and then a cracker is blown off the braid before its own fuse has burnt down,
+  // and goes off a moment later in the air or on the ground.
+  function throwStray(it) {
+    if (strays.length >= 40) return false;
+    strays.push({
+      x: it.x, y: it.y,
+      vx: (Math.random() < 0.75 ? it.side : -it.side) * rnd(80, 420),
+      vy: rnd(-480, -60),
+      rot: it.rot, vr: rnd(-24, 24),
+      fuse: rnd(0.12, 0.8)
+    });
+    return true;
+  }
+
+  function updateStray(st, dt) {
+    st.fuse -= dt;
+    if (st.fuse <= 0) {
+      crack(st.x, st.y, 1);
+      return false;
+    }
+    st.vy += 1100 * dt;
+    st.x += st.vx * dt;
+    st.y += st.vy * dt;
+    st.rot += st.vr * dt;
+    if (st.x < 4) { st.x = 4; st.vx = Math.abs(st.vx) * 0.5; }
+    if (st.x > W - 4) { st.x = W - 4; st.vx = -Math.abs(st.vx) * 0.5; }
+    const g = groundY(st.x) - 4;
+    if (st.y > g) {
+      st.y = g;
+      st.vy = -Math.abs(st.vy) * 0.35;
+      st.vx *= 0.6;
+      st.vr *= 0.5;
+    }
+    return true;
+  }
+
+  function updateString(s, dt) {
+    s.t += dt;
+    if (s.hang) {                                 // the braid swings and jerks as it is kicked about
+      s.omega += (-34 * s.theta - 2.4 * s.omega) * dt;
+      s.theta = clamp(s.theta + s.omega * dt, -0.3, 0.3);
+      poseString(s);
+    }
+    let left = 0;
+    let front = null;
+    for (const it of s.items) {
+      if (it.popped) continue;
+      if (s.t < it.popAt) {
+        left++;
+        if (!front || it.popAt < front.popAt) front = it;
+        continue;
+      }
+      it.popped = true;
+      s.lastPop = s.t;
+      if (s.hang) s.omega -= it.side * rnd(0.25, 0.75) * (it.big ? 2.2 : 1);
+      if (it.big || Math.random() > 0.11 || !throwStray(it)) crack(it.x, it.y, it.big ? 2.2 : 1);
+    }
+    s.reach = 0;
+    if (front) {                                  // the fuse, spitting just ahead of the bangs
+      s.sparks += dt * 90;
+      while (s.sparks >= 1) {
+        s.sparks -= 1;
+        addParticle(makeParticle(front.fx + rnd(-2, 2), front.fy + rnd(-2, 2), rnd(-1.6, 1.6), rnd(-1.2, 2.2),
+          rnd(0.12, 0.32), pick(CRACK_SPARKS), rnd(0.5, 1), 30, 0.95, "spark"));
+      }
+      if (s.hang) for (const it of s.items) if (!it.popped && it.s > s.reach) s.reach = it.s;
+    }
+    return left > 0 || s.t < s.lastPop + 0.3;
+  }
+
+  function drawCracker(x, y, rot, alpha, hot, big) {
+    const w = big ? BIG_W : TUBE_W;
+    const h = big ? BIG_H : TUBE_H;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(rot);
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = "#b51f1a";
-    ctx.fillRect(-3.5, -7, 7, 14);
-    ctx.fillStyle = "#e8c76a";
-    ctx.fillRect(-3.5, -7, 7, 2.2);
-    ctx.fillRect(-3.5, 4.8, 7, 2.2);
-    ctx.fillStyle = "rgba(255,255,255,0.35)";
-    ctx.fillRect(-1.2, -5, 1.2, 10);
-    ctx.fillStyle = "rgba(0,0,0,0.3)";
-    ctx.fillRect(2, -5.5, 1.2, 11);
-    ctx.strokeStyle = "#6b4a24";
+    ctx.strokeStyle = "#a8926a";                  // its own fuse, up to the braid
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(0, -7);
-    ctx.lineTo(0, -11);
+    ctx.moveTo(0, -h / 2);
+    ctx.lineTo(0, -h / 2 - 3);
     ctx.stroke();
+    ctx.fillStyle = big ? "#a81712" : "#c2201a";  // the red roll
+    ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.fillStyle = "rgba(255,255,255,0.3)";      // lit along one side, dark along the other
+    ctx.fillRect(-w / 2 + 1, -h / 2 + 1.5, w * 0.2, h - 3);
+    ctx.fillStyle = "rgba(0,0,0,0.3)";
+    ctx.fillRect(w / 2 - w * 0.26, -h / 2, w * 0.26, h);
+    ctx.fillStyle = "#d8c8a4";                    // the clay plugs at the two ends
+    ctx.fillRect(-w / 2, -h / 2, w, 1.6);
+    ctx.fillRect(-w / 2, h / 2 - 1.6, w, 1.6);
+    if (big) {
+      ctx.fillStyle = "#e8c76a";                  // a gold band marks a big one
+      ctx.fillRect(-w / 2, -2, w, 4);
+    }
     if (hot) {
       ctx.globalCompositeOperation = "lighter";
       ctx.fillStyle = "#ffd60a";
       ctx.beginPath();
-      ctx.arc(0, -11, 1.4 + Math.random() * 1.8, 0, TAU);
+      ctx.arc(0, -h / 2 - 3, 1.4 + Math.random() * 1.8, 0, TAU);
       ctx.fill();
       ctx.globalCompositeOperation = "source-over";
     }
@@ -576,29 +753,48 @@
   function drawString(s) {
     const items = s.items;
     ctx.globalCompositeOperation = "source-over";
-    ctx.globalAlpha = 0.6;
-    ctx.strokeStyle = "#d8b05c";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    if (s.rope) {
-      ctx.moveTo(s.rope.x, s.rope.y);
-      for (const it of items) ctx.lineTo(it.x, it.y - 8);
-    } else {
-      items.forEach((it, i) => (i ? ctx.lineTo(it.fx, it.fy) : ctx.moveTo(it.fx, it.fy)));
-    }
-    ctx.stroke();
-    if (s.rope) {
-      ctx.globalAlpha = 0.75;
-      ctx.strokeStyle = "#7a5426";
-      ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    if (s.hang) {
+      ctx.globalAlpha = 0.95;                     // the bamboo pole
+      ctx.strokeStyle = "#9a8a48";
+      ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.moveTo(s.rope.x - 26, s.rope.y);
-      ctx.lineTo(s.rope.x + 26, s.rope.y);
+      ctx.moveTo(s.ax - 52, s.ay - 4);
+      ctx.lineTo(s.ax + 52, s.ay - 4);
+      ctx.stroke();
+      ctx.strokeStyle = "#5f5426";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (const dx of [-30, 6, 38]) {
+        ctx.moveTo(s.ax + dx, s.ay - 6.5);
+        ctx.lineTo(s.ax + dx, s.ay - 1.5);
+      }
       ctx.stroke();
     }
+    ctx.globalAlpha = 0.85;                       // the braided fuse, as far as it has not burnt
+    ctx.strokeStyle = "#b9a374";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (s.hang) {
+      ctx.moveTo(s.ax, s.ay - 4);
+      for (let d = 0; d < s.reach + 12; d += 12) {
+        const at = Math.min(d, s.reach);
+        const phi = s.theta * (0.3 + 0.7 * at / s.L);
+        ctx.lineTo(s.ax + Math.sin(phi) * at, s.ay + Math.cos(phi) * at);
+      }
+    } else {
+      let started = false;
+      for (const it of items) {
+        if (it.popped) continue;
+        if (started) ctx.lineTo(it.fx, it.fy);
+        else ctx.moveTo(it.fx, it.fy);
+        started = true;
+      }
+    }
+    ctx.stroke();
+    ctx.lineCap = "butt";
     for (const it of items) {
-      if (it.popped) continue;
-      drawCracker(it.x, it.y, it.rot, 0.98, it.popAt - s.t < 0.11);
+      if (!it.popped) drawCracker(it.x, it.y, it.rot, 1, it.popAt - s.t < 0.1, it.big);
     }
     ctx.globalAlpha = 1;
   }
@@ -616,11 +812,9 @@
     if (k.phase === 0) {
       if (k.t >= 0.45) {
         k.phase = 1;
-        crackerPop(k.x, k.y + 12, 1.1, false);
-        sfx("bang", 0.8);
+        crack(k.x, k.y + 14, 2.2);
         const rise = clamp(k.y - 46, 60, 320);
         k.vy = -Math.sqrt(2 * 900 * rise);
-        shake(3, 0.18);
       }
       return true;
     }
@@ -629,12 +823,9 @@
     k.y += k.vy * dt;
     k.rot += k.vx * 0.004;
     addParticle(makeParticle(k.x + rnd(-2, 2), k.y + 12, rnd(-0.4, 0.4), rnd(0.5, 2),
-      rnd(0.2, 0.45), pick(["#ffd60a", "#ff9f0a", "#ffffff"]), rnd(0.7, 1.4), 20, 0.97, "spark"));
+      rnd(0.2, 0.45), pick(CRACK_SPARKS), rnd(0.7, 1.4), 20, 0.97, "spark"));
     if (k.vy >= -40) {
-      crackerPop(k.x, k.y, 1.7, true);
-      shocks.push({ x: k.x, y: k.y, t: 0, life: 0.8, max: 150, color: "#ffffff" });
-      sayAt(k.x, k.y - 34, "砰", 30, "#ffd60a");
-      shake(6, 0.3);
+      crack(k.x, k.y, 3.4);
       blast(k.x, k.y, 90, 0.5, null);
       return false;
     }
@@ -863,6 +1054,16 @@
         const d = Math.hypot(it.x - x, it.y - y);
         if (d < R) it.popAt = Math.min(it.popAt, s.t + d / 1000);
       }
+    }
+    for (const st of strays) {
+      const dx = st.x - x;
+      const dy = st.y - y;
+      const d = Math.hypot(dx, dy) || 1;
+      if (d > reach) continue;
+      const f = (1 - d / reach) * power;
+      st.vx += (dx / d) * f * 800;
+      st.vy += (dy / d) * f * 800 - 200 * f;
+      st.fuse = Math.min(st.fuse, 0.05 + d / 1400);
     }
     for (const p of papers) {
       const dx = p.x - x;
@@ -1223,7 +1424,7 @@
         g.path.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
         ctx.stroke();
         ctx.setLineDash([]);
-        for (let i = 0; i < g.path.length; i += 4) drawCracker(g.path[i][0], g.path[i][1], i * 0.9, 0.55, false);
+        for (let i = 0; i < g.path.length; i += 3) drawCracker(g.path[i][0], g.path[i][1], i * 0.9, 0.5, false, false);
         ctx.globalAlpha = 1;
       } else if (!g.fired && g.t > 0.12) {
         drawRing(g.sx, g.sy, g.t / 0.55, "二踢脚");
@@ -1256,7 +1457,8 @@
 
   function active() {
     return particles.length || smoke.length || flashes.length || shocks.length || fireballs.length ||
-      rockets.length || strings.length || kickers.length || bombs.length || flakes.length ||
+      rockets.length || strings.length || strays.length || cracks.length || kickers.length || bombs.length ||
+      flakes.length ||
       texts.length || touches.size || whiteout > 0.01 || shakeLeft > 0 ||
       papers.some((p) => !p.settled || p.rest > p.keep - 1.2) || mode === "snow";
   }
@@ -1335,7 +1537,7 @@
       let alpha = 0.95;
       if (p.settled) {
         p.rest += dt;
-        p.y = groundY(p.x) - 1;
+        p.y = groundY(p.x) - 1 - p.lift;
         if (p.rest > p.keep) { papers.splice(i, 1); continue; }
         alpha = Math.min(0.95, (p.keep - p.rest) / 1.2);
       } else {
@@ -1349,13 +1551,19 @@
         p.rot += p.vr * dt;
         if (p.x < 2) { p.x = 2; p.vx = Math.abs(p.vx) * 0.4; }
         if (p.x > W - 2) { p.x = W - 2; p.vx = -Math.abs(p.vx) * 0.4; }
-        if (p.vy > 0 && p.y >= groundY(p.x) - 1) {
+        if (p.vy > 0 && p.y >= groundY(p.x) - 1 - p.lift) {
           p.settled = true;
           p.rest = 0;
           p.rot = rnd(-0.4, 0.4);
         }
       }
-      const flip = p.settled ? 1 : 0.25 + 0.75 * Math.abs(Math.cos(p.age * 9 + p.phase));
+      if (p.settled) {
+        ctx.globalAlpha = Math.max(0, alpha);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x - p.w / 2, p.y - p.h / 2, p.w, p.h);
+        continue;
+      }
+      const flip = 0.25 + 0.75 * Math.abs(Math.cos(p.age * 9 + p.phase));
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate(p.rot);
@@ -1401,22 +1609,12 @@
 
     // strings of crackers
     for (let i = strings.length - 1; i >= 0; i--) {
-      const s = strings[i];
-      s.t += dt;
-      let left = 0;
-      let lastPop = 0;
-      for (const it of s.items) {
-        if (!it.popped && s.t >= it.popAt) {
-          it.popped = true;
-          it.at = s.t;
-          crackerPop(it.x, it.y, 0.9, false);
-          if (Math.random() < 0.13) sayAt(it.x + rnd(-18, 18), it.y - 18, "啪", 20, "#ffd60a");
-        }
-        if (it.popped) lastPop = Math.max(lastPop, it.at || 0);
-        else left++;
-      }
-      if (!left && s.t > lastPop + 0.35) strings.splice(i, 1);
-      else drawString(s);
+      if (dt > 0 && !updateString(strings[i], dt)) { strings.splice(i, 1); continue; }
+      drawString(strings[i]);
+    }
+    for (let i = strays.length - 1; i >= 0; i--) {
+      if (dt > 0 && !updateStray(strays[i], dt)) { strays.splice(i, 1); continue; }
+      drawCracker(strays[i].x, strays[i].y, strays[i].rot, 1, true, false);
     }
 
     for (let i = kickers.length - 1; i >= 0; i--) {
@@ -1492,14 +1690,43 @@
       p.vy *= Math.pow(p.drag, f);
       const k = p.life / p.maxLife;
       const r = safe(p.size * (1.7 - k * 0.55));
-      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-      g.addColorStop(0, "rgba(190,186,176,0.22)");
-      g.addColorStop(1, "rgba(190,186,176,0)");
-      ctx.globalAlpha = 0.3 * k;
+      ctx.globalAlpha = p.a * k;
+      ctx.drawImage(puffImage(), p.x - r, p.y - r, r * 2, r * 2);
+    }
+
+    // crackers going off: lit after the smoke, so the cloud glows from inside
+    ctx.globalCompositeOperation = "lighter";
+    for (let i = cracks.length - 1; i >= 0; i--) {
+      const c = cracks[i];
+      c.t += dt;
+      const k = c.t / c.life;
+      if (k >= 1) { cracks.splice(i, 1); continue; }
+      const fade = 1 - k * k;
+      const R = safe(c.r * 5.5);
+      const g = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, R);
+      g.addColorStop(0, "rgba(255,255,246,1)");   // white-hot at the centre
+      g.addColorStop(0.07, "rgba(255,246,206,0.95)");
+      g.addColorStop(0.2, "rgba(255,200,90,0.34)");
+      g.addColorStop(0.45, "rgba(255,150,50,0.11)");
+      g.addColorStop(1, "rgba(255,120,30,0)");
+      ctx.globalAlpha = fade;
       ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, r, 0, TAU);
+      ctx.arc(c.x, c.y, R, 0, TAU);
       ctx.fill();
+      ctx.globalAlpha = fade * 0.8;               // thin rays, uneven, thrown out as it goes
+      ctx.strokeStyle = "#fff6d8";
+      ctx.lineWidth = Math.max(0.8, c.r * 0.06);
+      ctx.beginPath();
+      const n = c.spikes.length;
+      for (let j = 0; j < n; j++) {
+        const a = c.turn + (j / n) * TAU + c.spikes[j];
+        const r0 = c.r * 0.3;
+        const r1 = c.r * c.spikes[j] * (0.9 + 0.9 * k);
+        ctx.moveTo(c.x + Math.cos(a) * r0, c.y + Math.sin(a) * r0);
+        ctx.lineTo(c.x + Math.cos(a) * r1, c.y + Math.sin(a) * r1);
+      }
+      ctx.stroke();
     }
 
     // sparks and debris
@@ -1642,7 +1869,7 @@
   }
 
   function clearAll() {
-    for (const list of [particles, smoke, flashes, shocks, fireballs, rockets, strings, kickers, bombs, papers, flakes, texts]) list.length = 0;
+    for (const list of [particles, smoke, flashes, shocks, fireballs, rockets, strings, strays, cracks, kickers, bombs, papers, flakes, texts]) list.length = 0;
     touches.clear();
     pile.fill(0);
     pileTop = 0;
